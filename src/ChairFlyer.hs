@@ -1,6 +1,7 @@
 module ChairFlyer where
 
 import Debug.Trace
+import Text.Printf
 
 data Vec2 = Vec2 Double Double
   deriving (Eq, Show)
@@ -108,10 +109,21 @@ someInput =
              , inputHeadingRad = 0
              }
 
+data AcState =
+  AcState { acPos :: Vec3
+          , acVel :: Vec2
+          , acMass :: Double
+          , acPitch :: Double
+          , acHeading :: Double
+          }
+  deriving Show
+
 someState =
   AcState { acPos = zerov3
           , acVel = zerov2
           , acMass = 540
+          , acPitch = 0
+          , acHeading = 0
           }
 
 data IState =
@@ -119,11 +131,41 @@ data IState =
          , isDrag :: Vec2
          , isThrust :: Vec2
          , isWeight :: Vec2
-         , isAoaDeg :: Double
+         , isAoa :: Double
          , isCl :: Double
          , isCd :: Double
          , isQ :: Double
+         , isHeadingRate :: Double
+         , isPitchRate :: Double
          }
+
+computeIState :: PilotInput -> AcProps -> AcState -> IState
+computeIState input acp ac =
+  IState { isLift = vup `scalev2` (q * (acpLiftingArea acp) * cl)
+         , isDrag = vforward `scalev2` (-q * (acpDraggingArea acp) * cd)
+         , isThrust = aforward `scalev2` (inputThrottleFraction input * acpMaxThrust acp)
+         , isWeight = downv2 `scalev2` (acMass ac * 9.81)
+         , isAoa = aoa
+         , isCl = cl
+         , isCd = cd
+         , isQ = q
+         , isHeadingRate = (inputHeadingRad input - acHeading ac) / 3
+         , isPitchRate = (inputPitchRad input - acPitch ac) / 3
+         }
+  where
+    p = acPitch ac
+    vel@(Vec2 vx vz) = acVel ac
+    magv = magv2 vel
+    aforward = Vec2 (cos p) (sin p)
+    vforward = unitv2 vel
+    vup = Vec2 (-vz) vx
+    radStall = degToRad 12
+    aoa = radTwixtv2 (acVel ac) aforward
+    density = 1.23
+    q = 0.5 * density * magv * magv
+    cl = if aoa > radStall || aoa < (-radStall) then 0 else aoa * 1
+    cd = if aoa > radStall || aoa < (-radStall) then 1 else (abs aoa) * 0.1
+
 
 data AcProps =
   AcProps { acpMass :: Double
@@ -132,12 +174,13 @@ data AcProps =
           , acpMaxThrust :: Double
           }
 
-data AcState =
-  AcState { acPos :: Vec3
-          , acVel :: Vec2
-          , acMass :: Double
+hackyJab :: AcProps
+hackyJab =
+  AcProps { acpMass = 540
+          , acpLiftingArea = 10
+          , acpDraggingArea = 2
+          , acpMaxThrust = 1000
           }
-  deriving Show
 
 clipGround :: AcState -> AcState
 clipGround ac =
@@ -150,43 +193,45 @@ clipGround ac =
         Vec2 vx vz = acVel ac
         vel' = Vec2 vx (if (onGround && vz < 0) then 0 else vz)
 
-step :: PilotInput -> AcState -> Double -> AcState
-step input ac secs =
-  ac { acPos = pos `addv3` (vel3 `scalev3` secs)
+step :: IState -> Double -> AcState -> AcState
+step is t ac = clipGround
+  ac { acPos = pos `addv3` (vel3 `scalev3` t)
      , acVel = vel'
+     , acPitch = p + t * isPitchRate is
+     , acHeading = h + t * isHeadingRate is
      }
-  where m = acMass ac
-        pos = acPos ac
-        vel@(Vec2 vx vz) = acVel ac
-        h = inputHeadingRad input
-        p = inputPitchRad input
-        maxThrust = 1000
-        aforward = Vec2 (cos p) (sin p)
-        vup = Vec2 (-vz) vx
-        vforward = unitv2 vel
-        thrust = aforward `scalev2` (inputThrottleFraction input * maxThrust)
-        density = 1.23
-        q = 0.5 * density * v * v
-        sl = 10 -- Lifting surface area
-        sd = 3 -- Dragging surface area
-        aoa = radTwixtv2 vel aforward
-        radStall = degToRad 12
-        cl = if aoa > radStall || aoa < (-radStall) then 0 else aoa * 1
-        cd = if aoa > radStall || aoa < (-radStall) then 1 else (abs aoa) * 0.1
-        lift = vup `scalev2` (q * sl * cl)
-        weight = downv2 `scalev2` (m * 9.81)
-        drag = vforward `scalev2` (q * sd * cd * (-1))
-        acc = (foldl addv2 zerov2 [lift, weight, thrust, drag]) `scalev2` (1 / m)
-        vel'@(Vec2 vx' vz') = (acVel ac) `addv2` (acc `scalev2` secs)
-        v = magv2 vel
-        vel3 = Vec3 (vx' * sin h) (vx' * cos h) vz'
+  where
+    pos = acPos ac
+    h = acHeading ac
+    p = acPitch ac
+    acc = (foldl addv2 zerov2 [ isLift is
+                              , isWeight is
+                              , isThrust is
+                              , isDrag is] )
+                 `scalev2` (1 / acMass ac)
+    vel'@(Vec2 vx' vz') = (acVel ac) `addv2` (acc `scalev2` t)
+    vel3 = Vec3 (vx' * sin h) (vx' * cos h) vz'
 
-writeDataFile :: [AcState] -> IO ()
+type AcState2 = (AcState, IState)
+
+step' :: AcState -> AcState2
+step' ac = (ac, computeIState someInput hackyJab ac)
+
+step2 :: AcState2 -> AcState2
+step2 (ac, is) = (ac', is')
+  where ac' = step is 1 ac
+        is' = computeIState someInput hackyJab ac'
+
+writeDataFile :: [AcState2] -> IO ()
 writeDataFile states = writeFile "output.dat" ls
-  where ls = unlines $ header : map dataLine states
-        header = "x y z vx vz vmag"
-        dataLine ac =
+  where ls = unlines $ map dataLine states
+        dataLine (ac, is) =
           let (Vec3 x y z) = acPos ac
               vel@(Vec2 vx vz) = acVel ac
               vmag = magv2 vel
-          in unwords [show x, show y, show z, show vx, show vz, show vmag]
+              aoa = radToDeg (isAoa is)
+              p = radToDeg (acPitch ac)
+          in unwords [sci x, sci y, sci z, sci vx, sci vz, sci vmag, sci aoa, sci p]
+
+sci :: Double -> String
+sci = printf "%7.2e"
