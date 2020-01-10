@@ -104,7 +104,7 @@ data PilotInput =
 
 someInput =
   PilotInput { inputThrottleFraction = 1.0
-             , inputPitchRad = degToRad 5
+             , inputPitchRad = degToRad 1
              , inputHeadingRad = 0
              }
 
@@ -112,6 +112,24 @@ someState =
   AcState { acPos = zerov3
           , acVel = zerov2
           , acMass = 540
+          }
+
+data IState =
+  IState { isLift :: Vec2
+         , isDrag :: Vec2
+         , isThrust :: Vec2
+         , isWeight :: Vec2
+         , isAoaDeg :: Double
+         , isCl :: Double
+         , isCd :: Double
+         , isQ :: Double
+         }
+
+data AcProps =
+  AcProps { acpMass :: Double
+          , acpLiftingArea :: Double
+          , acpDraggingArea :: Double
+          , acpMaxThrust :: Double
           }
 
 data AcState =
@@ -154,7 +172,7 @@ step input ac secs =
         aoa = radTwixtv2 vel aforward
         radStall = degToRad 12
         cl = if aoa > radStall || aoa < (-radStall) then 0 else aoa * 1
-        cd = if aoa > radStall || aoa < (-radStall) then 2 else (abs aoa) * 0.1
+        cd = if aoa > radStall || aoa < (-radStall) then 1 else (abs aoa) * 0.1
         lift = vup `scalev2` (q * sl * cl)
         weight = downv2 `scalev2` (m * 9.81)
         drag = vforward `scalev2` (q * sd * cd * (-1))
@@ -162,3 +180,13 @@ step input ac secs =
         vel'@(Vec2 vx' vz') = (acVel ac) `addv2` (acc `scalev2` secs)
         v = magv2 vel
         vel3 = Vec3 (vx' * sin h) (vx' * cos h) vz'
+
+writeDataFile :: [AcState] -> IO ()
+writeDataFile states = writeFile "output.dat" ls
+  where ls = unlines $ header : map dataLine states
+        header = "x y z vx vz vmag"
+        dataLine ac =
+          let (Vec3 x y z) = acPos ac
+              vel@(Vec2 vx vz) = acVel ac
+              vmag = magv2 vel
+          in unwords [show x, show y, show z, show vx, show vz, show vmag]
