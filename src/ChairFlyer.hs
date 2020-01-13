@@ -2,6 +2,8 @@ module ChairFlyer where
 
 import Debug.Trace
 import Text.Printf
+import Test.HUnit
+import Data.List
 
 data Vec2 = Vec2 Double Double
   deriving (Eq, Show)
@@ -55,7 +57,9 @@ magv2 (Vec2 x y) = sqrt $ x * x + y * y
 
 unitv2 :: Vec2 -> Vec2
 unitv2 v =
-  if mag == 0 then zerov2 else scalev2 v (1 / mag)
+  if mag == 0
+  then zerov2
+  else scalev2 v (1 / mag)
   where mag = magv2 v
 
 downv2 :: Vec2
@@ -71,20 +75,49 @@ crossv2 :: Vec2 -> Vec2 -> Vec3
 crossv2 (Vec2 ax ay) (Vec2 bx by) =
   Vec3 0 0 (ax * by - ay * bx)
 
+dotv2 :: Vec2 -> Vec2 -> Double
+dotv2 (Vec2 ax ay) (Vec2 bx by) = ax * bx + ay * by
+
 sign :: Double -> Double
 sign x | x > 0 = 1
        | x < 0 = -1
        | otherwise = 0
 
+joinLines :: [String] -> String
+joinLines = intercalate "\n"
+
 -- Find the signed angle (radians) between two vectors.
 -- Positive: anti-clockwise from a to b
 -- Negative: clockwise from a to b
 radTwixtv2 :: Vec2 -> Vec2 -> Double
-radTwixtv2 a b =
-  if cz == 0
-    then 0
-    else sign cz * asin ((abs cz) / (magv2 a * magv2 b))
+radTwixtv2 a b | ma == 0 || mb == 0 = 0
+               | otherwise = s * acos d
   where Vec3 _ _ cz = crossv2 a b
+        s | cz < 0 = -1
+          | otherwise = 1
+        d = (dotv2 a b) / (ma * mb)
+        ma = magv2 a
+        mb = magv2 b
+
+assertFloating :: Double -> Double -> Assertion
+assertFloating expected actual =
+  if abs (expected - actual) > 1e-7
+  then assertFailure $ joinLines ["expected: " ++ show expected, "     got: " ++ show actual]
+  else return ()
+
+radTwixtv2Tests :: Test
+radTwixtv2Tests = TestList
+  [ "orthogonal anti-clockwise" ~: assertFloating  (degToRad (-90)) (radTwixtv2 (Vec2 0 1) (Vec2 1 0))
+  , "orthogonal clockwise" ~: assertFloating (degToRad 90) (radTwixtv2 (Vec2 1 0) (Vec2 0 1))
+  , "opposites" ~: assertFloating (degToRad 180) (radTwixtv2 (Vec2 (-1) (-1)) (Vec2 1 1))
+  , "arbitrary acute angle 1" ~: assertFloating (degToRad 45) (radTwixtv2 (Vec2 1 1) (Vec2 0 1))
+  , "arbitrary acute angle 2" ~: assertFloating (degToRad 45) (radTwixtv2 (Vec2 1 (-1)) (Vec2 1 0))
+  , "arbitrary obtuse angle 1" ~: assertFloating (degToRad 135) (radTwixtv2 (Vec2 1 (-1)) (Vec2 0 1))
+  , "arbitrary obtuse angle 2" ~: assertFloating (degToRad 135) (radTwixtv2 (Vec2 (-1) (-1)) (Vec2 1 0))
+  , "zero 1" ~: assertFloating 0 (radTwixtv2 (Vec2 1 0) (Vec2 1 0))
+  , "zero 2" ~: assertFloating 0 (radTwixtv2 (Vec2 0 0) (Vec2 1 0))
+  , "zero 3" ~: assertFloating 0 (radTwixtv2 (Vec2 1 0) (Vec2 0 0))
+  ]
 
 --
 --
@@ -105,7 +138,7 @@ data PilotInput =
 
 someInput =
   PilotInput { inputThrottleFraction = 1.0
-             , inputPitchRad = degToRad 1
+             , inputPitchRad = degToRad 6
              , inputHeadingRad = 0
              }
 
@@ -158,13 +191,15 @@ computeIState input acp ac =
     magv = magv2 vel
     aforward = Vec2 (cos p) (sin p)
     vforward = unitv2 vel
-    vup = Vec2 (-vz) vx
-    radStall = degToRad 12
-    aoa = radTwixtv2 (acVel ac) aforward
+    vup = unitv2 $ Vec2 (-vz) vx
+    aoa = radTwixtv2 vforward aforward
     density = 1.23
     q = 0.5 * density * magv * magv
-    cl = if aoa > radStall || aoa < (-radStall) then 0 else aoa * 1
-    cd = if aoa > radStall || aoa < (-radStall) then 1 else (abs aoa) * 0.1
+    ar = 7.4
+    cl = if abs aoa > degToRad 15
+         then error ":("
+         else 2 * pi * ar / (ar + 2) * aoa
+    cd = 0.027 + cl * cl / pi / ar / 0.8
 
 
 data AcProps =
@@ -219,7 +254,7 @@ step' ac = (ac, computeIState someInput hackyJab ac)
 
 step2 :: AcState2 -> AcState2
 step2 (ac, is) = (ac', is')
-  where ac' = step is 1 ac
+  where ac' = step is 0.2 ac
         is' = computeIState someInput hackyJab ac'
 
 writeDataFile :: [AcState2] -> IO ()
@@ -231,7 +266,24 @@ writeDataFile states = writeFile "output.dat" ls
               vmag = magv2 vel
               aoa = radToDeg (isAoa is)
               p = radToDeg (acPitch ac)
-          in unwords [sci x, sci y, sci z, sci vx, sci vz, sci vmag, sci aoa, sci p]
+              cl = isCl is
+              cd = isCd is
+          in unwords [ sci x
+                     , sci y
+                     , sci z
+                     , sci vx
+                     , sci vz
+                     , sci vmag
+                     , sci aoa
+                     , sci p
+                     , sci cl
+                     , sci cd
+                     ]
 
 sci :: Double -> String
-sci = printf "%7.2e"
+sci = printf "%15.5e"
+
+sim :: IO ()
+sim = do
+  writeDataFile $ take 10000 $ iterate step2 (step' someState)
+  return ()
