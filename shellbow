@@ -1,0 +1,6 @@
+/home/sjc/ev/chairflyer/haskell
+ >
+ stack build && stack exec rk4scratch && gnuplot plots2.plt
+ which hlint
+ hindent src/*
+ stack -j 2 install hlint

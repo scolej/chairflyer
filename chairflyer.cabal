@@ -3,7 +3,13 @@ version:             0.1.0.0
 build-type:          Simple
 cabal-version:       >=1.10
 
--- executable chairflyer
+executable rk4scratch
+  main-is: RK4Scratch.hs
+  hs-source-dirs: src
+  build-depends: base
+               , chairflyer
+               , HUnit
+
 library
   build-depends:       base
                      , HUnit
