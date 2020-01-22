@@ -1,6 +1,11 @@
 /home/sjc/ev/chairflyer/haskell
  >
- stack build && stack exec rk4scratch && gnuplot plots2.plt
- which hlint
+ git commit -m "Spring."
+ git add -u && git status
+ git add src plots* setup* shellbow && git status
+
+ stack build && stack runghc src/SpringScratch.hs && gnuplot plots3.plt
+
  hindent src/*
+
  stack -j 2 install hlint

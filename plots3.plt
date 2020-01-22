@@ -6,7 +6,7 @@ unset key
 set grid
 
 set title "x"
-plot "output.dat" using 1 with lines
+plot "output.dat" using 1:2 with lines
 
 set title "v"
-plot "output.dat" using 2 with lines
+plot "output.dat" using 1:3 with lines
