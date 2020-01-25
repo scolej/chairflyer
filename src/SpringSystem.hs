@@ -12,6 +12,16 @@ data SpringRate =
              , srTime :: Double
              }
 
+-- | Simple spring & damper force system.
+computeSpringRate :: Double -> SpringState -> SpringRate
+computeSpringRate dt s =
+  SpringRate { srVel = sVel s
+             , srAcc = (0.5 - (sPos s)) * 0.01 - ((sVel s) * 0.1)
+             , srTime = 1 -- Time passes at 1 second per second
+             }
+
+-- * Boilerplate
+
 sAddRate :: SpringRate -> SpringState -> SpringState
 sAddRate r s =
   SpringState { sPos = sPos s + srVel r
@@ -31,11 +41,4 @@ sRateAdd a b =
   SpringRate { srVel = srVel a + srVel b
              , srAcc = srAcc a + srAcc b
              , srTime = srTime a + srTime b
-             }
-
-computeSpringRate :: Double -> SpringState -> SpringRate
-computeSpringRate dt s =
-  SpringRate { srVel = sVel s
-             , srAcc = (0.5 - (sPos s)) * 0.01 - ((sVel s) * 0.1)
-             , srTime = 1 -- Time passes at 1 second per second
              }
