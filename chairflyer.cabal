@@ -9,4 +9,6 @@ library
   hs-source-dirs:      src
   exposed-modules:   RK4
                    , SpringSystem
+                   , AcSystem
+                   , Vec
   default-language:    Haskell2010

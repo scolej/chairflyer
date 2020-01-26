@@ -5,6 +5,7 @@
  git add src plots* setup* shellbow && git status
 
  stack build && stack runghc src/SpringScratch.hs && gnuplot plots3.plt
+ stack build && stack runghc src/AcScratch.hs && gnuplot plots3.plt
 
  hindent src/*
 

@@ -34,7 +34,7 @@ acUnitForward s =
 acUnitUp :: AcState -> Vec2
 acUnitUp s =
   let p = acPitch s
-  in Vec2 (sin p) (cos p)
+  in Vec2 (-sin p) (cos p)
 
 -- | Compute a unit vector pointing backward along the aircraft's body
 acUnitBack :: AcState -> Vec2
@@ -72,30 +72,45 @@ hackyJab =
     , acpMaxThrust = 1000
     }
 
+-- FIXME should we be using dt somehow?
 computeAcRate :: AcProps -> Double -> AcState -> AcRate
 computeAcRate props dt s =
   AcRate
     { acrTime = 1
     , acrVel = acVel s
-    , acrAcc = foldl addv2 zerov2 [weight, lift, drag, thrust]
+    , acrAcc = (1 / acMass s) `scalev2` foldl1 addv2 [weight, lift, drag, thrust]
     , acrMass = 0
-    , acrHeading = 0
+    , acrHeading = degToRad 5
     , acrPitch = 0
     }
   where
     v = magv2 (acVel s)
-    weight = Vec2 0 (-9.81 * acMass s)
+    weight = Vec2 0 (-9.81 * 540)
+    -- weight = Vec2 0 (-9.81 * acMass s)
     q = 0.5 * 1.225 * v * v
     lift = (q * cl * (acpLiftingArea props)) `scalev2` acUnitVelUp s
     aoa = radTwixtv2 (acUnitVelForward s) (acUnitForward s)
     ar = 7.4
     cl =
       if abs aoa > degToRad 15
-        then error ":("
+        then 0
+        -- then error ":("
         else 2 * pi * ar / (ar + 2) * aoa
     cd = 0.027 + cl * cl / pi / ar / 0.8
     drag = (q * cd * (acpDraggingArea props)) `scalev2` acUnitVelBack s
     thrust = (acpMaxThrust props) `scalev2` acUnitForward s
+
+acClip :: AcState -> AcState
+acClip s = s { acPos = p
+             , acVel = v
+             }
+  where Vec3 x y z = acPos s
+        underground = z < 0
+        Vec2 vx vz = acVel s
+        p = Vec3 x y (if underground then 0 else z)
+        v = Vec2 vx (if underground then 0 else vz)
+
+-- * Boilerplate
 
 -- | How to add rate variables to state variables
 acAddRate :: AcRate -> AcState -> AcState
@@ -103,20 +118,19 @@ acAddRate r s =
   AcState
     { acTime = acTime s + acrTime r
     , acPos = acPos s `addv3` vel3
-    , acVel = acVel s `addv2` acrVel r
+    , acVel = acVel s `addv2` acrAcc r
     , acMass = acMass s + acrMass r
     , acHeading = acHeading s + acrHeading r
     , acPitch = acPitch s + acrPitch r
     }
   where
-    p = acPitch s
+    Vec2 vx vz = acrVel r
     h = acHeading s
-    v = magv2 (acVel s)
-    vel3 = Vec3 (v * cos p * sin h) (v * cos p * cos h) (v * sin p) -- Hack to propagate 2D velocity through 3D space
+    vel3 = Vec3 (vx * sin h) (vx * cos h) vz -- Hack to propagate 2D velocity through 3D space
 
 -- | How to scale the sytem change rate with a scalar value
-acScaleRate :: Double -> AcRate -> AcRate
-acScaleRate x r =
+acRateScale :: Double -> AcRate -> AcRate
+acRateScale x r =
   AcRate
     { acrTime = x * acrTime r
     , acrVel = x `scalev2` acrVel r
@@ -124,4 +138,15 @@ acScaleRate x r =
     , acrMass = x * acrMass r
     , acrHeading = x * acrHeading r
     , acrPitch = x * acrPitch r
+    }
+
+acRateAdd :: AcRate -> AcRate -> AcRate
+acRateAdd a b =
+  AcRate
+    { acrTime = acrTime a + acrTime b
+    , acrVel = acrVel a `addv2` acrVel b
+    , acrAcc = acrAcc a `addv2` acrAcc b
+    , acrMass = acrMass a + acrMass b
+    , acrHeading = acrHeading a + acrHeading b
+    , acrPitch = acrPitch a + acrPitch b
     }
