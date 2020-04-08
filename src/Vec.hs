@@ -1,6 +1,7 @@
 module Vec where
 
 import Data.List
+import Text.Printf
 import Test.HUnit
 
 data Vec2 =
@@ -130,6 +131,7 @@ radTwixtv2Tests =
 --
 --
 --
+
 degToRad :: Double -> Double
 degToRad = (*) (pi / 180)
 
@@ -138,3 +140,6 @@ radToDeg = (*) (180 / pi)
 
 joinLines :: [String] -> String
 joinLines = intercalate "\n"
+
+sci :: Double -> String
+sci = printf "%15.5e"

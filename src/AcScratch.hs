@@ -17,7 +17,7 @@ s0 =
           }
 
 hist :: [AcState]
-hist = take 7000 $ iterate (acClip . rk4 0.3) s0
+hist = take 7000 $ iterate (acClip . rk4 0.1) s0
 
 main :: IO ()
 main = writeFile "output.dat" $ unlines $ map (unwords . f) hist
@@ -27,6 +27,3 @@ main = writeFile "output.dat" $ unlines $ map (unwords . f) hist
           Vec2 vx vz = acVel s
           t = acTime s
       in map sci [t, x, y, z, vx, vz]
-
-sci :: Double -> String
-sci = printf "%15.5e"
