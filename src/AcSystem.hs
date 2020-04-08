@@ -78,7 +78,7 @@ computeAcRate props dt s =
   AcRate
     { acrTime = 1
     , acrVel = acVel s
-    , acrAcc = (1 / acMass s) `scalev2` foldl1 addv2 [weight, lift, drag, thrust]
+    , acrAcc = (1 / acMass s) `scalev2` sumv2 [weight, lift, drag, thrust]
     , acrMass = 0
     , acrHeading = degToRad 5
     , acrPitch = 0

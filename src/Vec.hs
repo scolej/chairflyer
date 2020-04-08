@@ -27,8 +27,14 @@ zipv2 f (Vec2 ax ay) (Vec2 bx by) = Vec2 (f ax bx) (f ay by)
 addv3 :: Vec3 -> Vec3 -> Vec3
 addv3 = zipv3 (+)
 
+sumv3 :: [Vec3] -> Vec3
+sumv3 = foldl1 addv3
+
 addv2 :: Vec2 -> Vec2 -> Vec2
 addv2 = zipv2 (+)
+
+sumv2 :: [Vec2] -> Vec2
+sumv2 = foldl1 addv2
 
 subv3 :: Vec3 -> Vec3 -> Vec3
 subv3 = zipv3 (-)

@@ -7,8 +7,9 @@ library
   build-depends:       base
                      , HUnit
   hs-source-dirs:      src
-  exposed-modules:   RK4
+  exposed-modules:   Integrators
                    , SpringSystem
                    , AcSystem
                    , Vec
+                   , Output
   default-language:    Haskell2010
