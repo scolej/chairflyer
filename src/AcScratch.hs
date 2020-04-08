@@ -20,7 +20,7 @@ hist :: [AcState]
 hist = take 7000 $ iterate (acClip . rk4 0.1) s0
 
 main :: IO ()
-main = writeFile "output.dat" $ unlines $ map (unwords . f) hist
+main = writeFile "tmp/output.dat" $ unlines $ map (unwords . f) hist
   where
     f s =
       let Vec3 x y z = acPos s

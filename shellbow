@@ -9,4 +9,4 @@
 
  hindent src/*
 
- stack -j 2 install hlint
+ stack -j 2 install hlint warp wai
