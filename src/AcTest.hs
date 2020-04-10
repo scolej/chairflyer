@@ -2,9 +2,10 @@ import AcSystem
 import Integrators
 import Output
 import Vec
+import Atmosphere
 
 rk4 :: Double -> AcState -> AcState
-rk4 = rk4step (acRate hackyJab) acStep
+rk4 = rk4step (acRate isa hackyJab) acStep
 
 s0 :: AcState
 s0 =
@@ -17,7 +18,7 @@ s0 =
           }
 
 hist :: [AcState]
-hist = take 7000 $ iterate (acClip . rk4 0.1) s0
+hist = takeWhile (\s -> acTime s < 30 * 60) $ iterate (acClip . rk4 0.1) s0
 
 showState :: AcState -> [String]
 showState s =

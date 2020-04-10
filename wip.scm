@@ -15,7 +15,7 @@
   (sys "inotifywait" "-e" "modify"
        "--exclude" "'flycheck_.*'"
        "-r"
-       "src" "plot-spring.plt")
+       "src" "lib" "plot-spring.plt")
   (spring-wip))
 
 (define (ac-wip)
@@ -29,7 +29,7 @@
   (sys "inotifywait" "-e" "modify"
        "--exclude" ".*flycheck_.*"
        "-r"
-       "src" "plot-ac.plt")
+       "src" "lib" "plot-ac.plt")
   (ac-wip))
 
 (define (atmosphere-wip)
@@ -42,11 +42,10 @@
    #:unwind? #t)
   (sys "inotifywait" "-e" "modify"
        "--exclude" ".*flycheck_.*"
-       "-r"
-       "src" "plot-atmosphere.plt")
+       "-r" "lib" "src" "plot-atmosphere.plt")
   (atmosphere-wip))
 
 ;; Still can't figure out how to quit from inotifywait
 ;; (sigaction SIGINT (lambda (x) (primitive-exit)))
 
-(atmosphere-wip)
+(ac-wip)

@@ -1,6 +1,7 @@
 module AcSystem where
 
 import Vec
+import Atmosphere
 
 -- | Aircraft state variables
 data AcState =
@@ -73,10 +74,10 @@ hackyJab =
     }
 
 -- FIXME should we be using dt somehow?
-acRate :: AcProps -> Double -> AcState -> AcRate
-acRate props dt s =
+acRate :: (Double -> Atmosphere) -> AcProps -> Double -> AcState -> AcRate
+acRate atmos props dt s =
   AcRate
-    { acrTime = 1
+    { acrTime = 1 -- FIXME get rid of this
     , acrVel = acVel s
     , acrAcc = (1 / acMass s) `scalev2` sumv2 [weight, lift, drag, thrust]
     , acrMass = 0
@@ -87,7 +88,9 @@ acRate props dt s =
     v = magv2 (acVel s)
     weight = Vec2 0 (-9.81 * 540)
     -- weight = Vec2 0 (-9.81 * acMass s)
-    q = 0.5 * 1.225 * v * v
+    Vec3 _ _ h = acPos s
+    rho = (atmosDensity . atmos) h
+    q = 0.5 * rho * v * v
     lift = (q * cl * (acpLiftingArea props)) `scalev2` acUnitVelUp s
     aoa = radTwixtv2 (acUnitVelForward s) (acUnitForward s)
     ar = 7.4
@@ -98,7 +101,8 @@ acRate props dt s =
         else 2 * pi * ar / (ar + 2) * aoa
     cd = 0.027 + cl * cl / pi / ar / 0.8
     drag = (q * cd * (acpDraggingArea props)) `scalev2` acUnitVelBack s
-    thrust = (acpMaxThrust props) `scalev2` acUnitForward s
+    -- FIXME huge hack for reducing thrust with altitude
+    thrust = (rho / 3 * acpMaxThrust props) `scalev2` acUnitForward s
 
 acClip :: AcState -> AcState
 acClip s = s { acPos = p
