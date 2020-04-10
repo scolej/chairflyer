@@ -1,10 +1,10 @@
 import AcSystem
-import RK4
+import Integrators
 import Vec
-import Text.Printf
+import Output
 
 rk4 :: Double -> AcState -> AcState
-rk4 = rk4step acAddRate acRateScale acRateAdd (computeAcRate hackyJab)
+rk4 = rk4step (acRate hackyJab) acStep
 
 s0 :: AcState
 s0 =
@@ -19,11 +19,13 @@ s0 =
 hist :: [AcState]
 hist = take 7000 $ iterate (acClip . rk4 0.1) s0
 
+showState :: AcState -> [String]
+showState s =
+  let Vec3 x y z = acPos s
+      Vec2 vx vz = acVel s
+      t = acTime s
+  in map sci [t, x, y, z, vx, vz]
+
 main :: IO ()
-main = writeFile "tmp/output.dat" $ unlines $ map (unwords . f) hist
-  where
-    f s =
-      let Vec3 x y z = acPos s
-          Vec2 vx vz = acVel s
-          t = acTime s
-      in map sci [t, x, y, z, vx, vz]
+main =
+  writeData "tmp/outputAc.dat" (map showState hist)

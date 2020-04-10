@@ -73,8 +73,8 @@ hackyJab =
     }
 
 -- FIXME should we be using dt somehow?
-computeAcRate :: AcProps -> Double -> AcState -> AcRate
-computeAcRate props dt s =
+acRate :: AcProps -> Double -> AcState -> AcRate
+acRate props dt s =
   AcRate
     { acrTime = 1
     , acrVel = acVel s
@@ -110,15 +110,12 @@ acClip s = s { acPos = p
         p = Vec3 x y (if underground then 0 else z)
         v = Vec2 vx (if underground then 0 else vz)
 
--- * Boilerplate
-
--- | How to add rate variables to state variables
-acAddRate :: AcRate -> AcState -> AcState
-acAddRate r s =
+acStep :: Double -> AcRate -> AcState -> AcState
+acStep dt r s =
   AcState
-    { acTime = acTime s + acrTime r
-    , acPos = acPos s `addv3` vel3
-    , acVel = acVel s `addv2` acrAcc r
+    { acTime = acTime s + dt
+    , acPos = acPos s `addv3` (dt `scalev3` vel3)
+    , acVel = acVel s `addv2` (dt `scalev2` acrAcc r )
     , acMass = acMass s + acrMass r
     , acHeading = acHeading s + acrHeading r
     , acPitch = acPitch s + acrPitch r
@@ -127,26 +124,3 @@ acAddRate r s =
     Vec2 vx vz = acrVel r
     h = acHeading s
     vel3 = Vec3 (vx * sin h) (vx * cos h) vz -- Hack to propagate 2D velocity through 3D space
-
--- | How to scale the sytem change rate with a scalar value
-acRateScale :: Double -> AcRate -> AcRate
-acRateScale x r =
-  AcRate
-    { acrTime = x * acrTime r
-    , acrVel = x `scalev2` acrVel r
-    , acrAcc = x `scalev2` acrAcc r
-    , acrMass = x * acrMass r
-    , acrHeading = x * acrHeading r
-    , acrPitch = x * acrPitch r
-    }
-
-acRateAdd :: AcRate -> AcRate -> AcRate
-acRateAdd a b =
-  AcRate
-    { acrTime = acrTime a + acrTime b
-    , acrVel = acrVel a `addv2` acrVel b
-    , acrAcc = acrAcc a `addv2` acrAcc b
-    , acrMass = acrMass a + acrMass b
-    , acrHeading = acrHeading a + acrHeading b
-    , acrPitch = acrPitch a + acrPitch b
-    }

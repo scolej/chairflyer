@@ -6,7 +6,7 @@ cabal-version:       >=1.10
 library
   build-depends:       base
                      , HUnit
-  hs-source-dirs:      src
+  hs-source-dirs:      lib
   exposed-modules:   Integrators
                    , SpringSystem
                    , AcSystem

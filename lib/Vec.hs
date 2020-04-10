@@ -48,11 +48,11 @@ mapv3 f (Vec3 ax ay az) = Vec3 (f ax) (f ay) (f az)
 mapv2 :: (Double -> Double) -> Vec2 -> Vec2
 mapv2 f (Vec2 ax ay) = Vec2 (f ax) (f ay)
 
-scalev3 :: Vec3 -> Double -> Vec3
-scalev3 v f = mapv3 (* f) v
+scalev3 :: Double -> Vec3 -> Vec3
+scalev3 f = mapv3 (* f)
 
 scalev2 :: Double -> Vec2 -> Vec2
-scalev2 f v = mapv2 (* f) v
+scalev2 f = mapv2 (* f)
 
 magv3 :: Vec3 -> Double
 magv3 (Vec3 x y z) = sqrt $ x * x + y * y + z * z
@@ -146,6 +146,3 @@ radToDeg = (*) (180 / pi)
 
 joinLines :: [String] -> String
 joinLines = intercalate "\n"
-
-sci :: Double -> String
-sci = printf "%15.5e"

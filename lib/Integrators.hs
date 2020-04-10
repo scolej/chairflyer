@@ -1,11 +1,19 @@
 module Integrators where
 
-type Integrator a b =
-     (Double -> a -> b) -- ^ Compute the rate of change from state and a time step
-  -> (Double -> b -> a -> a) -- ^ Linearly add rate and state with a time step
-  -> Double -- ^ Time step
-  -> a -- ^ Initial state
-  -> a -- ^ Next state
+-- | Functions which can integrate a system over time.
+-- 'a' is the system state
+-- 'b' is the system rate of change
+type Integrator a b
+  = (Double -> a -> b)
+  -- ^ Compute the rate of change from state and a time step
+  -> (Double -> b -> a -> a)
+  -- ^ Linearly add rate and state with a time step
+  -> Double
+  -- ^ Time step
+  -> a
+  -- ^ Initial state
+  -> a
+  -- ^ Next state
 
 eulerStep :: Integrator a b
 eulerStep rate step dt s0 = step dt (rate 0 s0) s0
