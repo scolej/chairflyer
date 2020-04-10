@@ -11,5 +11,6 @@ library
                    , SpringSystem
                    , AcSystem
                    , Vec
+                   , Atmosphere
                    , Output
   default-language:    Haskell2010

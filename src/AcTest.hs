@@ -1,7 +1,7 @@
 import AcSystem
 import Integrators
-import Vec
 import Output
+import Vec
 
 rk4 :: Double -> AcState -> AcState
 rk4 = rk4step (acRate hackyJab) acStep

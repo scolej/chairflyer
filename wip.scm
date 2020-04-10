@@ -32,7 +32,21 @@
        "src" "plot-ac.plt")
   (ac-wip))
 
+(define (atmosphere-wip)
+  (with-exception-handler
+   (lambda (exc) (format #t "Failed. ~a\n" exc))
+   (lambda ()
+     (sys "stack" "build")
+     (sys "stack" "runhaskell" "src/AtmosphereTest.hs")
+     (sys "gnuplot" "plot-atmosphere.plt"))
+   #:unwind? #t)
+  (sys "inotifywait" "-e" "modify"
+       "--exclude" ".*flycheck_.*"
+       "-r"
+       "src" "plot-atmosphere.plt")
+  (atmosphere-wip))
+
 ;; Still can't figure out how to quit from inotifywait
 ;; (sigaction SIGINT (lambda (x) (primitive-exit)))
 
-(ac-wip)
+(atmosphere-wip)
