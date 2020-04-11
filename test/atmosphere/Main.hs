@@ -9,4 +9,4 @@ layers = map layer [0,100..5000]
 
 main :: IO ()
 main =
-  writeData "tmp/atmosphere.dat" (map (map sci) layers)
+  writeData "out.dat" (map (map sci) layers)

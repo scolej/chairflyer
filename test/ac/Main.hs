@@ -29,4 +29,4 @@ showState s =
 
 main :: IO ()
 main =
-  writeData "tmp/outputAc.dat" (map showState hist)
+  writeData "out.dat" (map showState hist)

@@ -29,6 +29,5 @@ showState s = map sci [t, x, v]
 
 main :: IO ()
 main = do
-  writeData "tmp/outputRK4.dat" (map showState histrk4)
-  writeData "tmp/outputEuler.dat" (map showState histEuler)
-  putStrLn "Done!"
+  writeData "outRK4.dat" (map showState histrk4)
+  writeData "outEuler.dat" (map showState histEuler)

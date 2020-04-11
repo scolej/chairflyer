@@ -102,6 +102,7 @@ acRate atmos props dt s =
     cd = 0.027 + cl * cl / pi / ar / 0.8
     drag = (q * cd * (acpDraggingArea props)) `scalev2` acUnitVelBack s
     -- FIXME huge hack for reducing thrust with altitude
+    -- also, should reduce as v increases?
     thrust = (rho / 3 * acpMaxThrust props) `scalev2` acUnitForward s
 
 acClip :: AcState -> AcState
