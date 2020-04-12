@@ -18,7 +18,7 @@ s0 =
           }
 
 hist :: [AcState]
-hist = takeWhile (\s -> acTime s < 30 * 60) $ iterate (acClip . rk4 0.1) s0
+hist = takeWhile (\s -> acTime s < 30 * 60) $ iterate (acClip . rk4 0.5) s0
 
 showState :: AcState -> [String]
 showState s =

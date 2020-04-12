@@ -73,6 +73,31 @@ hackyJab =
     , acpMaxThrust = 1000
     }
 
+lerp :: Double -> Double -> Double -> Double
+lerp a b x = (1 - x) * a + x * b
+
+norm :: Double -> Double -> Double -> Double
+norm a b x = (x - a) / (b - a)
+
+rescale :: Double -> Double -> Double -> Double -> Double -> Double
+rescale a b c d x = lerp c d (norm a b x)
+
+clip :: Double -> Double -> Double -> Double
+clip a b x | x < a = a
+           | x > b = b
+           | otherwise = x
+
+-- | Make a rough estimate of how much thrust is available.
+-- Nothing about this is correct.
+-- As velocity increases thrust should go to 0: fixed pitch propellor performs worse and worse.
+-- As density decreases thrust should go to 0: less oxygen to burn, less density to push.
+-- Don't go below zero.
+hackyThrustAvailable :: Double -> Double -> Double -> Double
+hackyThrustAvailable maxThrust density v = clip 0 maxThrust t
+  where a = rescale 0 120 1 0 v
+        b = rescale 1.225 0.9 1 0 density
+        t = maxThrust * a * b
+
 -- FIXME should we be using dt somehow?
 acRate :: (Double -> Atmosphere) -> AcProps -> Double -> AcState -> AcRate
 acRate atmos props dt s =
@@ -101,9 +126,7 @@ acRate atmos props dt s =
         else 2 * pi * ar / (ar + 2) * aoa
     cd = 0.027 + cl * cl / pi / ar / 0.8
     drag = (q * cd * (acpDraggingArea props)) `scalev2` acUnitVelBack s
-    -- FIXME huge hack for reducing thrust with altitude
-    -- also, should reduce as v increases?
-    thrust = (rho / 3 * acpMaxThrust props) `scalev2` acUnitForward s
+    thrust = hackyThrustAvailable (acpMaxThrust props) rho v `scalev2` acUnitForward s
 
 acClip :: AcState -> AcState
 acClip s = s { acPos = p

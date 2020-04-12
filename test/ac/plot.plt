@@ -1,4 +1,4 @@
-set terminal pngcairo size 1200,500 enhanced font 'Terminus,8'
+set terminal pngcairo size 700,500 enhanced font 'Terminus,8'
 set output 'fig.png'
 
 set multiplot layout 2, 1
