@@ -7,21 +7,39 @@ import Control.Monad
 import System.IO
 import Output
 import Text.Printf
+import Data.List
 
-metresToFeet :: Double -> Double
-metresToFeet = (*) 3.28084
+--
+-- Conversions
+--
+
+mToFt :: Double -> Double
+mToFt = (*) 3.28084
+
+mToNm :: Double -> Double
+mToNm = (*) 0.0005399565
+
+mpsToFpm :: Double -> Double
+mpsToFpm mps = mToFt mps * 60
+
+mpsToKnots :: Double -> Double
+mpsToKnots = (*) 1.944
+
+--
+-- Pretty printing
+--
 
 showDist :: Double -> String
 showDist x = printf "%7.0f m" x
 
 showAltitude :: Double -> String
-showAltitude x = printf "%7.0f ft" (metresToFeet x)
+showAltitude x = printf "%7.0f ft" (mToFt x)
 
 showVs :: Double -> String
-showVs x = printf "%4.0f fpm" (metresToFeet x * 60)
+showVs x = printf "%4.0f fpm" (mpsToFpm x)
 
 showSpeed :: Double -> String
-showSpeed x = printf "%4.0f kts" (x * 1.944)
+showSpeed x = printf "%4.0f kts" (mpsToKnots x)
 
 showTime :: Double -> String
 showTime t = printf "%4.1f s" t
@@ -33,7 +51,38 @@ showHeading :: Double -> String
 showHeading h = printf "%03.0f" (radToDeg h)
 
 showCart :: Vec2 -> String
-showCart (Vec2 x y) = printf "[%5.1f,%5.1f NM]" (x * 0.0005399565) (y * 0.0005399565)
+showCart (Vec2 x y) = printf "%5.1f,%5.1f NM" (mToNm x) (mToNm y)
+
+--
+-- Output
+--
+
+showState :: AcState -> String
+showState ac = intercalate " | " [showHeading h, showSpeed v, showAltitude z, showCart p, showVs vs, showAngle aoa]
+  where (Vec3 x y z) = acPos ac
+        p = Vec2 x y
+        vel@(Vec2 _ vs) = acVel ac
+        v = magv2 $ vel
+        h = acHeading ac
+        aoa = alpha ac
+
+showGnuPlot :: AcState -> String
+showGnuPlot ac =
+  unwords $ map sci [ acTime ac
+                    , radToDeg (acHeading ac)
+                    , mToNm x
+                    , mToNm y
+                    , mToFt z
+                    , mpsToFpm vz
+                    , mpsToKnots (magv2 v)
+                    , radToDeg (alpha ac)
+                    ]
+  where Vec3 x y z = acPos ac
+        v@(Vec2 _ vz) = acVel ac
+
+--
+--
+--
 
 -- | Delay between writes to output pipe, seconds.
 outputDelay :: Double
@@ -56,14 +105,6 @@ startState =
             , acPitch = degToRad 5
             }
 
-showState :: AcState -> String
-showState ac = unwords [showHeading h, showSpeed v, showAltitude z, showCart p, showVs vs, showAngle aoa]
-  where (Vec3 x y z) = acPos ac
-        p = Vec2 x y
-        vel@(Vec2 _ vs) = acVel ac
-        v = magv2 $ vel
-        h = acHeading ac
-        aoa = alpha ac
 
 data Env =
   Env { pipeOut :: Handle
@@ -89,7 +130,7 @@ mainLoop env s0 = do
   let n = 1 + round (outputDelay / simTimeStep)
   let s2 = iterate simStep s1 !! n
 
-  hPutStrLn (pipeOut env) $ (showState s1)
+  hPutStrLn (pipeOut env) $ (showGnuPlot s1)
   hFlush (pipeOut env)
 
   threadDelay . round $ outputDelay * 1000000
