@@ -10,8 +10,8 @@ data AcState =
     , acPos :: Vec3 -- ^ Position in 3D space
     , acVel :: Vec2 -- ^ 2D velocity, longitudinal & vertical
     , acMass :: Double -- ^ Mass of aircraft
-    , acHeading :: Double -- ^ Aircraft heading
-    , acPitch :: Double -- ^ Aircraft pitch
+    , acHeading :: Double -- ^ Aircraft heading, radians
+    , acPitch :: Double -- ^ Aircraft pitch, radians
     }
 
 -- | Aircraft rate of change variables
@@ -106,7 +106,7 @@ acRate atmos props dt s =
     , acrVel = acVel s
     , acrAcc = (1 / acMass s) `scalev2` sumv2 [weight, lift, drag, thrust]
     , acrMass = 0
-    , acrHeading = degToRad 5
+    , acrHeading = 0
     , acrPitch = 0
     }
   where
@@ -117,16 +117,19 @@ acRate atmos props dt s =
     rho = (atmosDensity . atmos) h
     q = 0.5 * rho * v * v
     lift = (q * cl * (acpLiftingArea props)) `scalev2` acUnitVelUp s
-    aoa = radTwixtv2 (acUnitVelForward s) (acUnitForward s)
+    aoa = alpha s
     ar = 7.4
     cl =
       if abs aoa > degToRad 15
-        then 0
+        then 0 -- FIXME totally wrong, affects drag too
         -- then error ":("
         else 2 * pi * ar / (ar + 2) * aoa
     cd = 0.027 + cl * cl / pi / ar / 0.8
     drag = (q * cd * (acpDraggingArea props)) `scalev2` acUnitVelBack s
     thrust = hackyThrustAvailable (acpMaxThrust props) rho v `scalev2` acUnitForward s
+
+alpha :: AcState -> Double
+alpha s = radTwixtv2 (acUnitVelForward s) (acUnitForward s)
 
 acClip :: AcState -> AcState
 acClip s = s { acPos = p
