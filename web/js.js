@@ -10,6 +10,17 @@ function setAltitude(ft) {
   setRotation(svg.getElementById("thousands"), ts)
 }
 
+function trySocket() {
+  var s = new WebSocket("ws://127.0.0.1:8000", "protocolOne");
+  s.onmessage = function (event) {
+      console.log(event.data);
+      var j = JSON.parse(event.data);
+      console.log(j.rAltitude);
+      setAltitude(j.rAltitude)
+  }
+}
+
 window.addEventListener("load", function() {
   setAltitude(2900);
+  trySocket()
 })

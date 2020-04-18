@@ -1,29 +1,14 @@
 import AcSystem
-import Vec
 import Atmosphere
-import Integrators
 import Control.Concurrent
 import Control.Monad
-import System.IO
-import Output
-import Text.Printf
 import Data.List
-
---
--- Conversions
---
-
-mToFt :: Double -> Double
-mToFt = (*) 3.28084
-
-mToNm :: Double -> Double
-mToNm = (*) 0.0005399565
-
-mpsToFpm :: Double -> Double
-mpsToFpm mps = mToFt mps * 60
-
-mpsToKnots :: Double -> Double
-mpsToKnots = (*) 1.944
+import Integrators
+import Output
+import System.IO
+import Text.Printf
+import Units
+import Vec
 
 --
 -- Pretty printing
@@ -104,7 +89,6 @@ startState =
             , acHeading = 0
             , acPitch = degToRad 5
             }
-
 
 data Env =
   Env { pipeOut :: Handle

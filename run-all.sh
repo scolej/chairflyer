@@ -1,7 +1,7 @@
 set -x
 set -e
 
-stack build
+stack build --ghc-options='+RTS -M2.5G -RTS'
 
 pushd test/spring
 sh run.sh
