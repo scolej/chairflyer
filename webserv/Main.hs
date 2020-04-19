@@ -17,9 +17,8 @@ import Control.Monad
 -- Simulation
 --
 
--- | Delay between writes to output pipe, seconds.
-outputDelay :: Double
-outputDelay = 1
+threadDelaySec :: Double -> IO ()
+threadDelaySec s = threadDelay . round $ s * 1000000
 
 -- | Individual simulation time steps, seconds.
 simTimeStep :: Double
@@ -35,17 +34,15 @@ startState =
             , acVel = Vec2 0 0
             , acMass = acpMass hackyJab
             , acHeading = 0
-            , acPitch = degToRad 5
+            , acPitch = degToRad 10
             }
 
 simpleSim :: TVar AcState -> IO ()
 simpleSim var = forever go
-  where n = 1 + round (outputDelay / simTimeStep)
-        f s = iterate simStep s !! n
+  where f s = iterate simStep s !! 1
         go = do
-          putStrLn "tick"
           atomically $ modifyTVar var f
-          threadDelay . round $ outputDelay * 1000000
+          threadDelaySec simTimeStep
 
 --
 -- Server stuff
@@ -53,6 +50,7 @@ simpleSim var = forever go
 
 data Response =
   Response { rAltitude :: Double
+           , rAirspeed :: Double
            } deriving (Generic, Show)
 
 instance ToJSON Response where
@@ -77,7 +75,9 @@ app var pending = do
   let send = do
         s <- atomically $ readTVar var
         let Vec3 _ _ z = acPos s
-            resp = Response { rAltitude = mToFt z }
+            v = acVel s
+            resp = Response { rAltitude = mToFt z
+                            , rAirspeed = mpsToKnots (magv2 v)}
         WS.sendTextData conn $ encode resp
-        threadDelay . round $ outputDelay * 1000000
+        threadDelaySec simTimeStep
   forever send

@@ -1,17 +1,15 @@
+ulimit -v 2441406
+
 set -x
 while true
 do
     clear
 
     stack build
-
-    pushd test/console
-    # stack ghc Main.hs
-    stack runhaskell Main.hs &
-    # hlint Main.hs
+    stack exec webserv &
     PID=$!
-    popd
 
-    inotifywait -e modify --fromfile watch
+    inotifywait -e modify -r lib webserv
+    # inotifywait -e modify --fromfile watch
     kill $!
 done;
