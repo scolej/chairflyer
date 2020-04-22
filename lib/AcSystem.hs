@@ -6,47 +6,36 @@ import Handy
 import Integrators
 import Vec
 
--- FIXME maybe I belong in AcState
-data PilotInput =
-  PilotInput { piThrottle :: Double
-             , piPitch :: Double
-             }
-
 data AcSystem =
   AcSystem { sysState :: AcState
-           , sysInput :: PilotInput
-           , sysController :: AcController Double
+           , sysController :: AcController
            }
 
 stepAcSystem :: Double -> AcSystem -> AcSystem
-stepAcSystem dt s = s { sysState = ss'
-                      , sysInput = i'
-                      , sysController = c''
-                      }
+stepAcSystem dt sys =
+  sys { sysState = acClip . rk4step jabRate acStep dt $ ss' }
   where
-    c = sysController s
-    i = sysInput s
-    (i', c') = (cStep . sysController $ s)
-                  (sysState s) i dt (cState . sysController $ s)
-    c'' = c { cState  = c' } -- FIXME nasty, something is wrong here
-    ss' = acClip . rk4step jabRate acStep dt $ (sysState s) { acPitch = c' } -- FIXME crappy
+    c = sysController sys
+    ss = sysState sys
+    (ss', _) = (cStep c) ss dt (cState c)
 
 -- | A function representing a controller.
-type ControlStep s i c = s -> i -> Double -> c -> (i, c)
+type ControlStep s c = s -> Double -> c -> (s, c)
 
 -- | A controller with a stepping function and some state.
-data Controller s i c =
-  Controller { cStep :: ControlStep s i c
+data Controller s c =
+  Controller { cStep :: ControlStep s c
              , cState :: c
              }
 
-type AcController = Controller AcState PilotInput
+-- | Controller for aircraft state which keeps its own state as a double.
+type AcController = Controller AcState Double
 
 -- | Really dodgy airspeed controller.
 -- If we're going too fast pitch up!
 -- If we're going too slow pitch down!
-airspeedController :: Double -> ControlStep AcState PilotInput Double
-airspeedController targetV s i dt _ = (i', p'')
+airspeedController :: Double -> ControlStep AcState Double
+airspeedController targetV s dt _ = (s', 0)
   where
     p = acPitch s
     v = magv2 . acVel $ s
@@ -56,6 +45,5 @@ airspeedController targetV s i dt _ = (i', p'')
     pMax = degToRad 15
     pMin = if onGround then 0 else degToRad (-5)
     dv = v - targetV
-    p' = p + dv * delta * dt
-    p'' = clip pMin pMax p'
-    i' = i { piPitch = p'' }
+    p' = clip pMin pMax $ p + dv * delta * dt
+    s' = s { acPitch = p' }

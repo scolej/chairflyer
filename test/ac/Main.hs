@@ -6,11 +6,6 @@ import Output
 import Units
 import Vec
 
-pin :: PilotInput
-pin = PilotInput { piThrottle = 1
-                 , piPitch = degToRad 0
-                 }
-
 s0 :: AcState
 s0 =
   AcState { acTime = 0
@@ -23,14 +18,16 @@ s0 =
           }
 
 sys0 = AcSystem { sysState = s0
-                , sysInput = pin
-                , sysController = Controller { cStep = airspeedController (knotsToMps 80)
-                                             , cState = degToRad 0
-                                             }
+                , sysController =
+                    Controller { cStep = airspeedController (knotsToMps 80)
+                               , cState = 0
+                               }
                 }
 
 hist :: [AcState]
-hist = map sysState $ takeWhile (\s -> (acTime . sysState) s < 30 * 60) $ iterate (stepAcSystem 0.5) sys0
+hist = map sysState $
+       takeWhile (\s -> (acTime . sysState) s < 30 * 60) $
+       iterate (stepAcSystem 0.5) sys0
 
 showState :: AcState -> [String]
 showState s =
@@ -38,7 +35,8 @@ showState s =
       Vec2 vx vz = acVel s
       t = acTime s
       p = radToDeg $ acPitch s
-  in map sci [t, x, y, z, vx, vz, p]
+      a = radToDeg $ alpha s
+  in map sci [t, x, y, mToFt z, mpsToKnots vx, mpsToFpm vz, p, a]
 
 main :: IO ()
 main =
