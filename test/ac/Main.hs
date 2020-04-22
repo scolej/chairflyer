@@ -17,9 +17,15 @@ s0 =
           , acPitch = 0
           }
 
+speedChanger :: ControlStep AcState Double
+speedChanger s =
+  if acTime s < 600
+  then airspeedController (knotsToMps 80) s
+  else airspeedController (knotsToMps 100) s
+
 sys0 = AcSystem { sysState = s0
                 , sysController =
-                    Controller { cStep = airspeedController (knotsToMps 80)
+                    Controller { cStep = speedChanger
                                , cState = 0
                                }
                 }
@@ -27,7 +33,7 @@ sys0 = AcSystem { sysState = s0
 hist :: [AcState]
 hist = map sysState $
        takeWhile (\s -> (acTime . sysState) s < 30 * 60) $
-       iterate (stepAcSystem 0.5) sys0
+       iterate (stepAcSystem 0.3) sys0
 
 showState :: AcState -> [String]
 showState s =
