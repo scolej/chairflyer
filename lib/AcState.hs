@@ -1,6 +1,5 @@
 module AcState where
 
-import Debug.Trace
 import Atmosphere
 import Handy
 import Vec
@@ -100,7 +99,7 @@ acRate atmos props dt s =
     cd = 0.027 + cl * cl / pi / ar / 0.8
     drag = (q * cd * (acpDraggingArea props)) `scalev2` acUnitVelBack s
     thrust = hackyThrustAvailable (acpMaxThrust props) rho v
-    -- thrust = acThrottle s * hackyThrustAvailable (acpMaxThrust props) rho v
+    -- FIXME thrust = acThrottle s * hackyThrustAvailable (acpMaxThrust props) rho v
     thrustv = thrust `scalev2` acUnitForward s
 
 -- | Compute angle of attack.
@@ -129,7 +128,9 @@ acStep dt r s =
   where
     Vec2 vx vz = acrVel r
     h = acHeading s
-    vel3 = Vec3 (vx * sin h) (vx * cos h) vz -- Hack to propagate 2D velocity through 3D space
+    -- Hack to propagate 2D velocity through 3D space.
+    -- Need to worry about great circles & rhumb lines.
+    vel3 = Vec3 (vx * sin h) (vx * cos h) vz
 
 hackyJab :: AcProps
 hackyJab =
@@ -140,5 +141,6 @@ hackyJab =
     , acpMaxThrust = 1000
     }
 
+-- | Rate of change function for the hacky Jabiru in standard atmosphere.
 jabRate :: Double -> AcState -> AcRate
 jabRate = acRate isa hackyJab
