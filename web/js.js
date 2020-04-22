@@ -29,4 +29,22 @@ function trySocket() {
 window.addEventListener("load", function() {
   setAltitude(2900);
   trySocket()
+
+  var map = L.map('map', {
+    zoomControl: false,
+    dragging: false,
+    keyboard: false,
+    scrollWheelZoom: false,
+    center: [-37.69844,145.36649],
+    zoom: 16,
+    layers: [
+      L.tileLayer(
+        // 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // FIXME Check license!!
+        'https://tiles.wmflabs.org/osm-no-labels/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+        }
+      )
+    ]
+  });
 })

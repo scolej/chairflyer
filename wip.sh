@@ -6,10 +6,15 @@ do
     clear
 
     stack build
-    stack exec webserv &
-    PID=$!
 
-    inotifywait -e modify -r lib webserv
-    # inotifywait -e modify --fromfile watch
-    kill $!
+    pushd test/ac
+    sh run.sh
+    popd
+
+    # stack exec webserv &
+    # PID=$!
+    # inotifywait -e modify -r lib webserv
+    # kill $!
+
+    inotifywait -e modify --fromfile watch
 done;

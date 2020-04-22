@@ -9,19 +9,27 @@ library
   hs-source-dirs: lib
   exposed-modules: Integrators
                  , SpringSystem
+                 , AcState
                  , AcSystem
                  , Vec
                  , Atmosphere
                  , Output
                  , Units
+                 , Handy
   default-language: Haskell2010
 
-executable webserv
-  hs-source-dirs: webserv
-  main-is: Main.hs
+executable test-ac
+  hs-source-dirs: test
+  main-is: ac/Main.hs
   build-depends: base
-               , websockets
-               , text
-               , aeson
                , chairflyer
-               , stm
+
+-- executable webserv
+--   hs-source-dirs: webserv
+--   main-is: Main.hs
+--   build-depends: base
+--                , websockets
+--                , text
+--                , aeson
+--                , chairflyer
+--                , stm

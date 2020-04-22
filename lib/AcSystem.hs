@@ -1,157 +1,92 @@
 module AcSystem where
 
-import Vec
+import Debug.Trace
 import Atmosphere
+import Handy
+import Vec
+import AcState
+import Integrators
 
--- | Aircraft state variables
-data AcState =
-  AcState
-    { acTime :: Double -- ^ Absolute time
-    , acPos :: Vec3 -- ^ Position in 3D space
-    , acVel :: Vec2 -- ^ 2D velocity, longitudinal & vertical
-    , acMass :: Double -- ^ Mass of aircraft
-    , acHeading :: Double -- ^ Aircraft heading, radians
-    , acPitch :: Double -- ^ Aircraft pitch, radians
-    }
-
--- | Aircraft rate of change variables
-data AcRate =
-  AcRate
-    { acrTime :: Double -- ^ Rate of change of absolute time; most likely equal 1
-    , acrVel :: Vec2 -- ^ 2D velocity, longitudinal & vertical
-    , acrAcc :: Vec2 -- ^ 2D acceleration, longitudinal & vertical
-    , acrMass :: Double -- ^ Rate of change of mass
-    , acrHeading :: Double -- ^ Turn rate
-    , acrPitch :: Double -- ^ Pitch rate
-    }
-
--- | Compute a unit vector pointing forward along the aircraft's body
-acUnitForward :: AcState -> Vec2
-acUnitForward s =
-  let p = acPitch s
-  in Vec2 (cos p) (sin p)
-
--- | Compute a unit vector pointing up from the aircraft's body
-acUnitUp :: AcState -> Vec2
-acUnitUp s =
-  let p = acPitch s
-  in Vec2 (-sin p) (cos p)
-
--- | Compute a unit vector pointing backward along the aircraft's body
-acUnitBack :: AcState -> Vec2
-acUnitBack = scalev2 (-1) . acUnitForward
-
--- | Compute a unit vector pointing in the reverse direction to the aircraft's motion
-acUnitVelForward :: AcState -> Vec2
-acUnitVelForward = unitv2 . acVel
-
--- | Compute a unit vector pointing in the direction of the aircraft's motion
-acUnitVelBack :: AcState -> Vec2
-acUnitVelBack = scalev2 (-1) . acUnitVelForward
-
--- | Compute a unit vector pointing upwards at right angles to the aircraft's motion
-acUnitVelUp :: AcState -> Vec2
-acUnitVelUp s = Vec2 (-y) x
-  where Vec2 x y = acUnitVelForward s
-
--- | Aircraft properties.
-data AcProps =
-  AcProps
-    { acpMass :: Double
-    , acpLiftingArea :: Double
-    , acpDraggingArea :: Double
-    , acpMaxThrust :: Double
-    }
-  deriving (Show)
-
-hackyJab :: AcProps
-hackyJab =
-  AcProps
-    { acpMass = 540
-    , acpLiftingArea = 10
-    , acpDraggingArea = 2
-    , acpMaxThrust = 1000
-    }
-
-lerp :: Double -> Double -> Double -> Double
-lerp a b x = (1 - x) * a + x * b
-
-norm :: Double -> Double -> Double -> Double
-norm a b x = (x - a) / (b - a)
-
-rescale :: Double -> Double -> Double -> Double -> Double -> Double
-rescale a b c d x = lerp c d (norm a b x)
-
-clip :: Double -> Double -> Double -> Double
-clip a b x | x < a = a
-           | x > b = b
-           | otherwise = x
-
--- | Make a rough estimate of how much thrust is available.
--- Nothing about this is correct.
--- As velocity increases thrust should go to 0: fixed pitch propellor performs worse and worse.
--- As density decreases thrust should go to 0: less oxygen to burn, less density to push.
--- Don't go below zero.
-hackyThrustAvailable :: Double -> Double -> Double -> Double
-hackyThrustAvailable maxThrust density v = clip 0 maxThrust t
-  where a = rescale 0 120 1 0 v
-        b = rescale 1.225 0.9 1 0 density
-        t = maxThrust * a * b
-
--- FIXME should we be using dt somehow?
-acRate :: (Double -> Atmosphere) -> AcProps -> Double -> AcState -> AcRate
-acRate atmos props dt s =
-  AcRate
-    { acrTime = 1 -- FIXME get rid of this
-    , acrVel = acVel s
-    , acrAcc = (1 / acMass s) `scalev2` sumv2 [weight, lift, drag, thrust]
-    , acrMass = 0
-    , acrHeading = 0
-    , acrPitch = 0
-    }
-  where
-    v = magv2 (acVel s)
-    weight = Vec2 0 (-9.81 * 540)
-    -- weight = Vec2 0 (-9.81 * acMass s)
-    Vec3 _ _ h = acPos s
-    rho = (atmosDensity . atmos) h
-    q = 0.5 * rho * v * v
-    lift = (q * cl * (acpLiftingArea props)) `scalev2` acUnitVelUp s
-    aoa = alpha s
-    ar = 7.4
-    cl =
-      if abs aoa > degToRad 15
-        then 0 -- FIXME totally wrong, affects drag too
-        -- then error ":("
-        else 2 * pi * ar / (ar + 2) * aoa
-    cd = 0.027 + cl * cl / pi / ar / 0.8
-    drag = (q * cd * (acpDraggingArea props)) `scalev2` acUnitVelBack s
-    thrust = hackyThrustAvailable (acpMaxThrust props) rho v `scalev2` acUnitForward s
-
-alpha :: AcState -> Double
-alpha s = radTwixtv2 (acUnitVelForward s) (acUnitForward s)
-
-acClip :: AcState -> AcState
-acClip s = s { acPos = p
-             , acVel = v
+-- FIXME maybe I belong in AcState
+data PilotInput =
+  PilotInput { piThrottle :: Double
+             , piPitch :: Double
              }
-  where Vec3 x y z = acPos s
-        underground = z < 0
-        Vec2 vx vz = acVel s
-        p = Vec3 x y (if underground then 0 else z)
-        v = Vec2 vx (if underground then 0 else vz)
 
-acStep :: Double -> AcRate -> AcState -> AcState
-acStep dt r s =
-  AcState
-    { acTime = acTime s + dt
-    , acPos = acPos s `addv3` (dt `scalev3` vel3)
-    , acVel = acVel s `addv2` (dt `scalev2` acrAcc r )
-    , acMass = acMass s + acrMass r
-    , acHeading = acHeading s + acrHeading r
-    , acPitch = acPitch s + acrPitch r
-    }
-  where
-    Vec2 vx vz = acrVel r
-    h = acHeading s
-    vel3 = Vec3 (vx * sin h) (vx * cos h) vz -- Hack to propagate 2D velocity through 3D space
+data AcSystem = 
+  AcSystem { sysState :: AcState
+           , sysInput :: PilotInput
+           -- , sysControllers :: [AcController Double]
+           -- Ahhh removing the list here might solve the class dilemma as well!
+           -- controllers must cooperate, so there's no sense abstracting their state here
+           , sysController :: AcController Double
+           }
+
+stepAcSystem :: Double -> AcSystem -> AcSystem
+stepAcSystem dt s = s { sysState = ss'
+                      , sysInput = i'
+                      , sysController = c''
+                      }
+  where 
+    c = sysController s
+    i = sysInput s
+    (i', c') = (cStep . sysController $ s) 
+                  (sysState s) i dt (cState . sysController $ s)
+    c'' = c { cState  = c' } -- FIXME nasty, something is wrong here
+    ss' = acClip . rk4step jabRate acStep dt $ (sysState s) { acPitch = c' } -- FIXME crappy
+  
+
+-- data Controller s i c =
+--   Controller { 
+
+-- type Controller s i c = s -> Double -> c -> (i -> i, c)
+-- type AcController c = Controller AcState PilotInput c
+
+type ControlStep s i c = s -> i -> Double -> c -> (i, c)
+
+data Controller s i c =
+  Controller { cStep :: ControlStep s i c
+             , cState :: c
+             }
+
+type AcController = Controller AcState PilotInput
+
+airspeedController :: Double -> ControlStep AcState PilotInput Double
+airspeedController targetV s i dt _ = (i', p'')
+  where 
+    p = acPitch s
+    v = magv2 . acVel $ s
+    delta = degToRad 0.05
+    Vec3 _ _ z = acPos s
+    onGround = z < 0.5
+    pMax = degToRad 15
+    pMin = if onGround then 0 else degToRad (-5)
+    dv = v - targetV
+    p' = p + dv * delta * dt
+    p'' = clip pMin pMax p'
+    i' = i { piPitch = p'' }
+
+
+
+-- Attempt #1
+--
+--   -- | A controller.
+--   -- s   the system under control
+--   -- a   a value extracted from the system which is to be controlled
+--   -- i   the system inputs which can be updated by the controller
+--   -- c   controller state
+--   data Controller s a i c =
+--     Controller { cGetInput :: s -> a -- ^ Get the control target value from the system
+--                , cGetOutput :: c -> i -> i -- ^ Update the system inputs with the controllers output
+--                , cStep :: a -> Double -> c -> c -- ^ Step the controller with a new value and its old state over a timestep
+--                }
+--   
+--   acPitchController :: Double -> Controller AcState Double PilotInputs Double
+--   acPitchController targetV = 
+--     Controller { cGetInput = magv2 . acVel
+--                , cGetOutput = \p pin -> pin { piPitch = p }
+--                , cStep v dt p -> if v < targetV
+--                                  then p - delta * dt
+--                                  else p + delta * dt
+--                                  where delta = degToRad 1 / 2 -- Adjust half a degree each second
+--                }

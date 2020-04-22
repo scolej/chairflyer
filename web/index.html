@@ -1,12 +1,19 @@
 <html>
   <head>
+     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+           integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+           crossorigin=""/>
+     <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+             integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+             crossorigin=""></script>
     <script src="js.js"></script>
   </head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <body>
+    <div id="map" style='height: 300px'></div>
     <svg version="1.1"
-         width="100%" height="100%"
-         viewBox="-100 -100 200 200"
+         width="100%"
+         viewBox="-100 -50 200 100"
          id="instruments"
          xmlns="http://www.w3.org/2000/svg">
       <style>

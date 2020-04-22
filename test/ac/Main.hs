@@ -1,31 +1,44 @@
 import AcSystem
+import Units
+import AcState
 import Integrators
 import Output
 import Vec
 import Atmosphere
 
-rk4 :: Double -> AcState -> AcState
-rk4 = rk4step (acRate isa hackyJab) acStep
+pin :: PilotInput
+pin = PilotInput { piThrottle = 1
+                 , piPitch = degToRad 0
+                 }
 
 s0 :: AcState
 s0 =
   AcState { acTime = 0
+          , acThrottle = 1
           , acPos = zerov3
           , acVel = Vec2 0 0
           , acMass = acpMass hackyJab
           , acHeading = 0
-          , acPitch = degToRad 5
+          , acPitch = 0
           }
 
+sys0 = AcSystem { sysState = s0
+                , sysInput = pin
+                , sysController = Controller { cStep = airspeedController (knotsToMps 80)
+                                             , cState = degToRad 0
+                                             }
+                }
+
 hist :: [AcState]
-hist = takeWhile (\s -> acTime s < 30 * 60) $ iterate (acClip . rk4 0.5) s0
+hist = map sysState $ takeWhile (\s -> (acTime . sysState) s < 30 * 60) $ iterate (stepAcSystem 0.5) sys0
 
 showState :: AcState -> [String]
 showState s =
   let Vec3 x y z = acPos s
       Vec2 vx vz = acVel s
       t = acTime s
-  in map sci [t, x, y, z, vx, vz]
+      p = radToDeg $ acPitch s
+  in map sci [t, x, y, z, vx, vz, p]
 
 main :: IO ()
 main =
