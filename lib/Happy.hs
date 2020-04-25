@@ -13,6 +13,10 @@ data Test =
        , testResult :: Maybe [String]
        }
 
+(@@@) :: String -> Maybe [String] -> Test
+infixr 1 @@@
+(@@@) = Test
+
 -- | Add some indentation to every line.
 indent :: Int -> [String] -> [String]
 indent i = map ((++) (take i $ repeat ' '))
