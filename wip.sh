@@ -5,11 +5,12 @@ while true
 do
     clear
 
-    stack build
+    # stack build
+    stack test
 
-    pushd test/ac
-    sh run.sh
-    popd
+    # pushd test/ac
+    # sh run.sh
+    # popd
 
     # stack exec webserv &
     # PID=$!

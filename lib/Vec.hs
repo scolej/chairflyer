@@ -60,6 +60,14 @@ magv3 (Vec3 x y z) = sqrt $ x * x + y * y + z * z
 magv2 :: Vec2 -> Double
 magv2 (Vec2 x y) = sqrt $ x * x + y * y
 
+unitv3 :: Vec3 -> Vec3
+unitv3 v =
+  if mag == 0
+    then zerov3
+    else scalev3 (1 / mag) v
+  where
+    mag = magv3 v
+
 unitv2 :: Vec2 -> Vec2
 unitv2 v =
   if mag == 0
@@ -76,6 +84,12 @@ downv3 = Vec3 0 0 (-1)
 
 reversev2 :: Vec2 -> Vec2
 reversev2 v = scalev2 (-1) v
+
+crossv3 :: Vec3 -> Vec3 -> Vec3
+crossv3 (Vec3 ax ay az) (Vec3 bx by bz) =
+  Vec3 (ay * bz - az * by)
+       (az * bx - ax * bz)
+       (ax * by - ay * bx)
 
 crossv2 :: Vec2 -> Vec2 -> Vec3
 crossv2 (Vec2 ax ay) (Vec2 bx by) = Vec3 0 0 (ax * by - ay * bx)
