@@ -1,7 +1,6 @@
 module AcSystem where
 
 import AcState
-import Atmosphere
 import Handy
 import Integrators
 import Vec

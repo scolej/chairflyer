@@ -13,3 +13,9 @@ clip :: Double -> Double -> Double -> Double
 clip a b x | x < a = a
            | x > b = b
            | otherwise = x
+
+degToRad :: Double -> Double
+degToRad = (*) (pi / 180)
+
+radToDeg :: Double -> Double
+radToDeg = (*) (180 / pi)

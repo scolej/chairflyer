@@ -42,7 +42,6 @@ runTests :: [Test] -> IO ()
 runTests ts = do
   let failed = any (isJust . testResult) ts
       ls = spreadPrint $ map go ts ++ [if failed then "FAIL" else "PASS"]
-  putStrLn ""
   mapM_ putStr ls
   putStrLn ""
   if failed
@@ -71,4 +70,31 @@ assertLL a@(alat, alon) b@(blat, blon) =
   else Just $ mismatch
                (printf "%16.10f %16.10f" alat alon)
                (printf "%16.10f %16.10f" blat blon)
+
+isNegative :: (Ord a, Num a, Show a) => a -> Maybe [String]
+isNegative a
+  | a < 0 = Nothing
+  | otherwise =
+      Just [ "expected negative value:"
+           , show a
+           ]
+
+magIncreasing :: (Ord a, Num a, Show a) => a -> a -> Maybe [String]
+magIncreasing a b
+  | abs a < abs b = Nothing
+  | otherwise =
+      Just [ "expected increasing magnitudes:"
+           , show a
+           , show b
+           ]
+
+-- FIXME specialise for double? to get numbers formatted the same
+magDecreasing :: (Ord a, Num a, Show a) => a -> a -> Maybe [String]
+magDecreasing a b
+  | abs a > abs b = Nothing
+  | otherwise =
+      Just [ "expected decreasing magnitudes:"
+           , show a
+           , show b
+           ]
 

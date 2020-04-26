@@ -74,7 +74,7 @@ hackyThrustAvailable maxThrust density v = clip 0 maxThrust t
         b = rescale 1.225 0.9 1 0 density
         t = maxThrust * a * b
 
--- FIXME should we be using dt somehow?
+-- FIXME if we don't use dt, is there any advantage to using RK4?
 acRate :: (Double -> Atmosphere) -> AcProps -> Double -> AcState -> AcRate
 acRate atmos props dt s =
   AcRate

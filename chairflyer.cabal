@@ -19,6 +19,7 @@ library
                  , Output
                  , Units
                  , Handy
+                 , LiftDrag
   default-language: Haskell2010
 
 test-suite chairflyer-tests
@@ -29,6 +30,7 @@ test-suite chairflyer-tests
   build-depends: base
                , chairflyer
   default-language: Haskell2010
+  other-modules: LiftDragTest
 
 executable test-ac
   hs-source-dirs: test

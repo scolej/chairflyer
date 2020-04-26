@@ -1,8 +1,8 @@
 module Vec where
 
 import Data.List
-import Text.Printf
 import Test.HUnit
+import Handy
 
 data Vec2 =
   Vec2 Double Double
@@ -119,11 +119,13 @@ radTwixtv2 a b
     ma = magv2 a
     mb = magv2 b
 
+-- FIXME convert these!!
+
 assertFloating :: Double -> Double -> Assertion
 assertFloating expected actual =
   if abs (expected - actual) > 1e-7
     then assertFailure $
-         joinLines ["expected: " ++ show expected, "     got: " ++ show actual]
+         intercalate "\n" ["expected: " ++ show expected, "     got: " ++ show actual]
     else return ()
 
 radTwixtv2Tests :: Test
@@ -151,12 +153,3 @@ radTwixtv2Tests =
 --
 --
 --
-
-degToRad :: Double -> Double
-degToRad = (*) (pi / 180)
-
-radToDeg :: Double -> Double
-radToDeg = (*) (180 / pi)
-
-joinLines :: [String] -> String
-joinLines = intercalate "\n"

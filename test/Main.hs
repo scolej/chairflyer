@@ -1,11 +1,14 @@
 import NVector
 import Vec
 import Happy
+import Handy
+import qualified LiftDragTest
 
 main :: IO ()
 main = do
   runTests $ backAndForth
           ++ destinations
+          ++ LiftDragTest.sanity
 
 backAndForth :: [Test]
 backAndForth =

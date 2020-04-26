@@ -1,6 +1,7 @@
 module NVector where
 
 import Vec
+import Handy
 
 earthRadius :: Double
 earthRadius = 6378137
