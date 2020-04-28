@@ -3,6 +3,7 @@ module AcState where
 import Atmosphere
 import Handy
 import Vec
+import LiftDrag
 
 -- | Aircraft state variables
 data AcState =
@@ -76,7 +77,7 @@ hackyThrustAvailable maxThrust density v = clip 0 maxThrust t
 
 -- FIXME if we don't use dt, is there any advantage to using RK4?
 acRate :: (Double -> Atmosphere) -> AcProps -> Double -> AcState -> AcRate
-acRate atmos props dt s =
+acRate atmos props _ s =
   AcRate
     { acrVel = acVel s
     , acrAcc = (1 / acMass s) `scalev2` sumv2 [weight, lift, drag, thrustv]
@@ -91,15 +92,9 @@ acRate atmos props dt s =
     lift = (q * cl * (acpLiftingArea props)) `scalev2` acUnitVelUp s
     aoa = alpha s
     ar = 7.4
-    cl =
-      if abs aoa > degToRad 15
-        then 0 -- FIXME totally wrong, affects drag too
-        -- then error ":("
-        else 2 * pi * ar / (ar + 2) * aoa
-    cd = 0.027 + cl * cl / pi / ar / 0.8
+    (cl, cd) = liftDrag ar aoa
     drag = (q * cd * (acpDraggingArea props)) `scalev2` acUnitVelBack s
-    thrust = hackyThrustAvailable (acpMaxThrust props) rho v
-    -- FIXME thrust = acThrottle s * hackyThrustAvailable (acpMaxThrust props) rho v
+    thrust = acThrottle s * hackyThrustAvailable (acpMaxThrust props) rho v
     thrustv = thrust `scalev2` acUnitForward s
 
 -- | Compute angle of attack.
@@ -107,7 +102,6 @@ alpha :: AcState -> Double
 alpha s = radTwixtv2 (acUnitVelForward s) (acUnitForward s)
 
 -- | Make sure we can't fly underground.
--- FIXME should also probably restrict pitch here too
 acClip :: AcState -> AcState
 acClip s = s { acPos = p
              , acVel = v

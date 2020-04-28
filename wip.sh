@@ -8,9 +8,9 @@ do
     # stack build
     stack test
 
-    pushd plot
-    sh run.sh
-    popd
+    # pushd test/ac
+    # sh run.sh
+    # popd
 
     # stack exec webserv &
     # PID=$!

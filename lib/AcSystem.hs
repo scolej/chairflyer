@@ -1,6 +1,7 @@
 module AcSystem where
 
 import AcState
+import Controller
 import Handy
 import Integrators
 import Vec
@@ -17,15 +18,6 @@ stepAcSystem dt sys =
     c = sysController sys
     ss = sysState sys
     (ss', _) = (cStep c) ss dt (cState c)
-
--- | A function representing a controller.
-type ControlStep s c = s -> Double -> c -> (s, c)
-
--- | A controller with a stepping function and some state.
-data Controller s c =
-  Controller { cStep :: ControlStep s c
-             , cState :: c
-             }
 
 -- | Controller for aircraft state which keeps its own state as a double.
 type AcController = Controller AcState Double

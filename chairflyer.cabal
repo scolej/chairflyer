@@ -20,6 +20,7 @@ library
                  , Units
                  , Handy
                  , LiftDrag
+                 , Controller
   default-language: Haskell2010
 
 test-suite chairflyer-tests
@@ -38,13 +39,12 @@ executable test-ac
   build-depends: base
                , chairflyer
 
--- FIXME
--- executable webserv
---   hs-source-dirs: webserv
---   main-is: Main.hs
---   build-depends: base
---                , websockets
---                , text
---                , aeson
---                , chairflyer
---                , stm
+executable webserv
+  hs-source-dirs: webserv
+  main-is: Main.hs
+  build-depends: base
+               , websockets
+               , text
+               , aeson
+               , chairflyer
+               , stm

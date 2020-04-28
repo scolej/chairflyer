@@ -2,8 +2,6 @@ module LiftDrag where
 
 import Handy
 
--- FIXME I'm not linked to ac yet!
-
 liftDrag :: Double -> Double -> (Double, Double)
 liftDrag ar aoa = (cl, cd)
   where

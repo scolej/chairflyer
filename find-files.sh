@@ -1,4 +1,4 @@
-find lib test \
+find lib test webserv \
      -iname \*.hs \
      -or -iname \*.plt \
      -or -iname \*.sh \
