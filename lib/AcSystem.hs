@@ -11,6 +11,12 @@ data AcSystem =
            , sysController :: AcController
            }
 
+-- FIXME lens?
+updateState :: (AcState -> AcState) -> AcSystem -> AcSystem
+updateState f ac =
+  let acs = sysState ac
+  in ac { sysState = f acs }
+
 stepAcSystem :: Double -> AcSystem -> AcSystem
 stepAcSystem dt sys =
   sys { sysState = acClip . rk4step jabRate acStep dt $ ss' }

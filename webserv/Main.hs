@@ -66,11 +66,6 @@ instance ToJSON Response where
 
 instance FromJSON Response
 
-updateState :: (AcState -> AcState) -> AcSystem -> AcSystem
-updateState f ac =
-  let acs = sysState ac
-  in ac { sysState = f acs }
-
 parseMessage :: String -> AcSystem -> AcSystem
 parseMessage ('p':rest) = updateState (\a -> a { acPitch = degToRad $ read rest })
 parseMessage ('t':rest) = updateState (\a -> a { acThrottle = read rest })

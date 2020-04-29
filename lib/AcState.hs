@@ -87,13 +87,16 @@ acRate atmos props _ s =
     v = magv2 (acVel s)
     weight = Vec2 0 (-9.81 * acMass s)
     Vec3 _ _ h = acPos s
+    onGround = h < 0.1
     rho = (atmosDensity . atmos) h
     q = 0.5 * rho * v * v
     lift = (q * cl * (acpLiftingArea props)) `scalev2` acUnitVelUp s
     aoa = alpha s
     ar = 7.4
     (cl, cd) = liftDrag ar aoa
-    drag = (q * cd * (acpDraggingArea props)) `scalev2` acUnitVelBack s
+    groundDrag = if onGround then 400 else 0 -- TODO Could be better.
+    dragMag = (q * cd * (acpDraggingArea props)) + groundDrag
+    drag = dragMag`scalev2` acUnitVelBack s -- TODO Could be better, ground drag is not in the same direction.
     thrust = acThrottle s * hackyThrustAvailable (acpMaxThrust props) rho v
     thrustv = thrust `scalev2` acUnitForward s
 

@@ -17,6 +17,9 @@ function setAltitude(ft) {
 }
 
 window.addEventListener("load", function() {
+    setAirspeed(0);
+    setAltitude(0);
+
     var s = new WebSocket("ws://127.0.0.1:8000", "protocolOne");
     s.onmessage = function (event) {
         console.log(event.data);

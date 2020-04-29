@@ -9,14 +9,15 @@ do
     stack test
 
     if [[ $? -eq 0 ]]; then
-        stack exec webserv &
-        PID=$!
+        # stack exec webserv &
+        # PID=$!
+
+        pushd test/ac
+        sh run.sh
+        popd
     fi;
 
-    # pushd test/ac
-    # sh run.sh
-    # popd
 
     inotifywait -e modify --fromfile watch
-    kill $PID
+    # kill $PID
 done;
