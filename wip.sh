@@ -8,14 +8,15 @@ do
     # stack build
     stack test
 
+    if [[ $? -eq 0 ]]; then
+        stack exec webserv &
+        PID=$!
+    fi;
+
     # pushd test/ac
     # sh run.sh
     # popd
 
-    # stack exec webserv &
-    # PID=$!
-    # inotifywait -e modify -r lib webserv
-    # kill $!
-
     inotifywait -e modify --fromfile watch
+    kill $PID
 done;

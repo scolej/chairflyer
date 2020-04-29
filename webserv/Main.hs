@@ -25,7 +25,7 @@ threadDelaySec s = threadDelay . round $ s * 1000000
 
 -- | Individual simulation time steps, seconds.
 simTimeStep :: Double
-simTimeStep = 0.2
+simTimeStep = 0.4
 
 simStep :: AcSystem -> AcSystem
 simStep = stepAcSystem simTimeStep
@@ -39,6 +39,7 @@ startState =
                   , acMass = acpMass hackyJab
                   , acHeading = 0
                   , acPitch = degToRad 10
+                  , acThrottle = 1
                   }
     in AcSystem { sysState = ac0
                 , sysController = idController
@@ -65,6 +66,16 @@ instance ToJSON Response where
 
 instance FromJSON Response
 
+updateState :: (AcState -> AcState) -> AcSystem -> AcSystem
+updateState f ac =
+  let acs = sysState ac
+  in ac { sysState = f acs }
+
+parseMessage :: String -> AcSystem -> AcSystem
+parseMessage ('p':rest) = updateState (\a -> a { acPitch = degToRad $ read rest })
+parseMessage ('t':rest) = updateState (\a -> a { acThrottle = read rest })
+parseMessage _ = id
+
 port :: Int
 port = 8000
 
@@ -85,7 +96,15 @@ app var pending = do
             Vec3 _ _ z = acPos ac
             v = acVel ac
             resp = Response { rAltitude = mToFt z
-                            , rAirspeed = mpsToKnots (magv2 v)}
+                            , rAirspeed = mpsToKnots (magv2 v)
+                            }
         WS.sendTextData conn $ encode resp
         threadDelaySec simTimeStep
-  forever send
+  forkIO $ forever send
+  let receive = do
+        txt <- unpack <$> WS.receiveData conn
+        putStrLn $ "Received " ++ txt
+        let u = parseMessage $ txt
+        atomically $ modifyTVar var u
+  forever receive
+  -- FIXME if we use 'forever' here, what happens when the connection closes?
