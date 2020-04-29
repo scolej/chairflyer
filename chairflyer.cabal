@@ -10,6 +10,7 @@ library
   hs-source-dirs: lib
   exposed-modules: Integrators
                  , SpringSystem
+                 , SpringSystem2
                  , AcState
                  , AcSystem
                  , Vec
@@ -36,6 +37,12 @@ test-suite chairflyer-tests
 executable test-ac
   hs-source-dirs: test
   main-is: ac/Main.hs
+  build-depends: base
+               , chairflyer
+
+executable pidspring
+  hs-source-dirs: test/pidspring
+  main-is: Main.hs
   build-depends: base
                , chairflyer
 
