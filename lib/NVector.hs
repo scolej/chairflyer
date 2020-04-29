@@ -2,6 +2,7 @@ module NVector where
 
 import Vec
 import Handy
+import Data.Fixed
 
 earthRadius :: Double
 earthRadius = 6378137
@@ -44,3 +45,7 @@ destination s h dist = (cos t `scalev3` s) `addv3` (sin t `scalev3` d)
         d = (cos h `scalev3` n) `addv3` (sin h `scalev3` e)
         e = unitv3 $ Vec3 1 0 0 `crossv3` s
         n = s `crossv3` e
+
+-- | Wrap an angle into the range 0 to 2 pi.
+wrapHeading :: Double -> Double
+wrapHeading h = h `mod'` (2 * pi)

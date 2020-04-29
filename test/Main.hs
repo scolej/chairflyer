@@ -1,5 +1,4 @@
 import NVector
-import Vec
 import Happy
 import Handy
 import qualified LiftDragTest
@@ -8,8 +7,10 @@ main :: IO ()
 main = do
   runTests $ backAndForth
           ++ destinations
+          ++ angleWrapping
           ++ LiftDragTest.sanity
 
+-- FIXME split into separate file
 backAndForth :: [Test]
 backAndForth =
   let ll  = (-30, 134)
@@ -45,4 +46,13 @@ destinations =
          assertLL
             (53.1884335712, 0.131199053)
             (nvecToLLDeg $ destination p1 h dist)
+     ]
+
+angleWrapping :: [Test]
+angleWrapping =
+  let asd e a = assertDouble 1e-6 e (radToDeg . wrapHeading . degToRad $ a)
+  in [ "negative wrap" @@@ asd 180 (-180)
+     , "positive wrap" @@@ asd 10 370
+     , "unchanged (1)" @@@ asd 10 10
+     , "unchanged (2)" @@@ asd 190 190
      ]

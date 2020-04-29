@@ -6,16 +6,16 @@ do
     clear
 
     # stack build
-    # stack test
+    stack test
 
-    if [[ $? -eq 0 ]]; then
+    #if [[ $? -eq 0 ]]; then
         # stack exec webserv &
         # PID=$!
 
-        pushd test/pidspring
-        sh run.sh
-        popd
-    fi;
+        # pushd test/pidspring
+        # sh run.sh
+        # popd
+    #fi;
 
     inotifywait -e modify --fromfile watch
     # kill $PID

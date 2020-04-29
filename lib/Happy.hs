@@ -51,6 +51,18 @@ runTests ts = do
 eqDoub :: Double -> Double -> Double -> Bool
 eqDoub tol a b = abs (a - b) < tol
 
+assertDouble :: Double -> Double -> Double -> Maybe [String]
+assertDouble tol e a =
+  if eqDoub tol e a
+  then Nothing
+  else Just [ "actual value was not within tolerance of expected value"
+            , printf "tolerance        : %10.3g" tol
+            , printf "expected (lower) : %10.3g" (e - tol)
+            , printf "expected (middle): %10.3g" e
+            , printf "expected (upper) : %10.3g" (e + tol)
+            , printf "actual           : %10.3g" a
+            ]
+
 eqLL :: LatLon -> LatLon -> Bool
 eqLL (alat, alon) (blat, blon) =
   eqDoub 1e-5 alat blat &&
@@ -97,4 +109,3 @@ magDecreasing a b
            , show a
            , show b
            ]
-
