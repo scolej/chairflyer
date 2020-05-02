@@ -1,29 +1,22 @@
-ulimit -v 2441406
+set -e
+set -x
 
-# set -x
-while true
-do
-    echo
-    echo
-    echo
-    echo
-    echo
-    echo
+stack build --test
 
-    stack build chairflyer:exe:pidspring
+# if [[ $? -eq 0 ]]; then
+# stack exec webserv &
+# PID=$!
 
-    # stack test
-    # stack ghc lib/Controller.hs
+# Directories waiting to be incorporated into the Stack build.
+HACKS=
+HACKS="$HACKS test/ac"
+HACKS="$HACKS test/ld"
+HACKS="$HACKS test/pidspring"
+HACKS="$HACKS test/prop"
+HACKS="$HACKS test/spring"
 
-    if [[ $? -eq 0 ]]; then
-        # stack exec webserv &
-        # PID=$!
-
-        pushd test/pidspring
-        sh run.sh
-        popd
-    fi;
-
-    inotifywait -e modify --fromfile watch
-    # kill $PID
-done;
+for d in $HACKS; do
+    pushd $d
+    sh run.sh
+    popd
+done

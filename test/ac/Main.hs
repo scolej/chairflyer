@@ -48,28 +48,24 @@ histClimbCutThrottle =
 -- Initial speed & then a change.
 --
 
-speedChanger :: ControlStep AcState Double
-speedChanger s =
-  if acTime s < 600
-  then airspeedController (knotsToMps 65) s
-  else airspeedController (knotsToMps 100) s
-
-sys0 = AcSystem { sysState = s0
-                , sysController =
-                    Controller { cStep = speedChanger
-                               , cState = 0
-                               }
-                }
+speedChanger :: Controller AcState
+speedChanger = Controller $
+  \dt s0 -> let Controller c =
+                    if acTime s0 < 600
+                    then airspeedController (knotsToMps 65)
+                    else airspeedController (knotsToMps 100)
+                -- FIXME Under this arrangement we get lucky because 'airspeedController'
+                -- doesn't carry any state. How to compose controllers like this _and_
+                -- pipe their own state along?
+                (s, _) = c dt s0
+            in (s, speedChanger)
 
 histSpeedChanger :: [AcState]
 histSpeedChanger =
   map sysState $ takeMinutes 30 $ iterate (stepAcSystem 0.3) sys0
   where sys0 =
           AcSystem { sysState = s0
-                   , sysController =
-                     Controller { cStep = speedChanger
-                                , cState = 0
-                                }
+                   , sysController = speedChanger
                    }
 
 --

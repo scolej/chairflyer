@@ -8,7 +8,7 @@ import Vec
 
 data AcSystem =
   AcSystem { sysState :: AcState
-           , sysController :: AcController
+           , sysController :: Controller AcState
            }
 
 -- FIXME lens?
@@ -18,29 +18,29 @@ updateState f ac =
   in ac { sysState = f acs }
 
 stepAcSystem :: Double -> AcSystem -> AcSystem
-stepAcSystem dt sys =
-  sys { sysState = acClip . rk4step jabRate acStep dt $ ss' }
+stepAcSystem dt sys0 =
+  AcSystem { sysState = s
+           , sysController = c
+           }
   where
-    c = sysController sys
-    ss = sysState sys
-    (ss', _) = (cStep c) ss dt (cState c)
-
--- | Controller for aircraft state which keeps its own state as a double.
-type AcController = Controller AcState Double
+    Controller c0 = sysController sys0
+    s0 = sysState sys0
+    (s1, c) = c0 dt s0
+    s = acClip . rk4step jabRate acStep dt $ s1
 
 -- | Really dodgy airspeed controller.
 -- If we're going too fast pitch up!
 -- If we're going too slow pitch down!
-airspeedController :: Double -> ControlStep AcState Double
-airspeedController targetV s dt _ = (s', 0)
-  where
-    p = acPitch s
-    v = magv2 . acVel $ s
-    delta = degToRad 0.05
-    Vec3 _ _ z = acPos s
-    onGround = z < 0.5
-    pMax = degToRad 15
-    pMin = if onGround then 0 else degToRad (-5)
-    dv = v - targetV
-    p' = clip pMin pMax $ p + dv * delta * dt
-    s' = s { acPitch = p' }
+airspeedController :: Double -> Controller AcState
+airspeedController targetV = Controller $
+  \dt s0 -> let p = acPitch s0
+                v = magv2 . acVel $ s0
+                delta = degToRad 0.05
+                Vec3 _ _ z = acPos s0
+                onGround = z < 0.5
+                pMax = degToRad 15
+                pMin = if onGround then 0 else degToRad (-5)
+                dv = v - targetV
+                p' = clip pMin pMax $ p + dv * delta * dt
+                s = s0 { acPitch = p' }
+            in (s, airspeedController targetV)
