@@ -11,8 +11,8 @@ library
   exposed-modules: Integrators
                  , SpringSystem
                  , SpringSystem2
-                 , AcState
-                 , AcSystem
+                 -- , AcState
+                 -- , AcSystem
                  , Vec
                  , NVector
                  , Happy

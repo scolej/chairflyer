@@ -3,7 +3,7 @@ import Controller
 import Integrators
 import Output
 
-type SpringController = Controller SpringState PIDState
+type SpringController = Controller SpringState
 
 data Sys =
   Sys { sysState :: SpringState
@@ -19,10 +19,7 @@ sInit =
               }
 
 cInit :: SpringController
-cInit =
-  Controller { cStep = pidStep (0.1, 0.01, 3) sPos (\x s -> s { sForce = x }) 1
-             , cState = pidZero
-             }
+cInit = pidController (0.1, 0.01, 3) sPos (\x s -> s { sForce = x }) 1
 
 sysInit =
   Sys { sysState = sInit
@@ -35,11 +32,11 @@ stepSpring dt = rk4step springRate springStep dt
 step :: Double -> Sys -> Sys
 step dt sys0 =
   Sys { sysState = s
-      , sysController = c0 { cState = c }
+      , sysController = c
       }
   where s0 = sysState sys0
-        c0 = sysController sys0
-        (s1, c) = (cStep c0) s0 dt (cState c0)
+        Controller c0 = sysController sys0
+        (s1, c) = c0 dt s0
         s = stepSpring dt s1
 
 takeMinutes :: Double -> [Sys] -> [Sys]
