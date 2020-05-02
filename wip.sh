@@ -3,6 +3,8 @@ set -x
 
 stack build --test
 
+exit 0
+
 # if [[ $? -eq 0 ]]; then
 # stack exec webserv &
 # PID=$!

@@ -49,3 +49,6 @@ destination s h dist = (cos t `scalev3` s) `addv3` (sin t `scalev3` d)
 -- | Wrap an angle into the range 0 to 2 pi.
 wrapHeading :: Double -> Double
 wrapHeading h = h `mod'` (2 * pi)
+
+initialHeading :: NVec -> NVec -> Double
+initialHeading a b = 0

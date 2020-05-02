@@ -33,6 +33,7 @@ test-suite chairflyer-tests
                , chairflyer
   default-language: Haskell2010
   other-modules: LiftDragTest
+               , NVectorTest
 
 executable test-ac
   hs-source-dirs: test
