@@ -62,11 +62,11 @@ assertDouble tol e a =
   if eqDoub tol e a
   then Nothing
   else Just [ "actual value was not within tolerance of expected value"
-            , printf "tolerance        : %10.3e" tol
-            , printf "expected (lower) : %10.3e" (e - tol)
-            , printf "expected (middle): %10.3e" e
-            , printf "expected (upper) : %10.3e" (e + tol)
-            , printf "actual           : %10.3e" a
+            , printf "tolerance        : %10.5e" tol
+            , printf "expected (lower) : %10.5e" (e - tol)
+            , printf "expected (middle): %10.5e" e
+            , printf "expected (upper) : %10.5e" (e + tol)
+            , printf "actual           : %10.5e" a
             ]
 
 eqLL :: LatLon -> LatLon -> Bool

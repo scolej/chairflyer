@@ -60,11 +60,13 @@ angleWrapping =
 
 initialHeadingTests :: [Test]
 initialHeadingTests =
-  let ini a b e = assertDouble 1e-6 e $
+  let ini a b e = assertDouble 1e-3 e $
                        radToDeg (initialHeading (llDegToNVec a) (llDegToNVec b))
   in prefixTests "initial heading"
      [ "to the north pole" @@@ ini (0, 0) (90, 0) 0
      , "to the south pole" @@@ ini (0, 0) (-90, 0) 180
      , "to the east" @@@ ini (0, 0) (0, 1) 90
      , "to the west" @@@ ini (0, 0) (0, (-1)) 270
+     , "Lilydale 36" @@@ ini (-37.698329, 145.365335) (-37.686684, 145.367438) 8.133
+     , "Lilydale 18" @@@ ini (-37.686684, 145.367438) (-37.698329, 145.365335) 188.132
      ]

@@ -123,6 +123,7 @@ radTwixtv2 a b
 
 -- | Find the signed angle between two vectors 'a' and 'n', looking along 'n'.
 -- Positive angles are anti-clockwise.
+-- FIXME There must be a simpler way to write this.
 radTwixtv3 :: Vec3 -> Vec3 -> Vec3 -> Double
 radTwixtv3 n a b
   | any isZerov3 [n, a, b] = 0
