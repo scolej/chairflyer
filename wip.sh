@@ -17,8 +17,8 @@ HACKS="$HACKS test/pidspring"
 HACKS="$HACKS test/prop"
 HACKS="$HACKS test/spring"
 
-for d in $HACKS; do
-    pushd $d
-    sh run.sh
-    popd
-done
+# for d in $HACKS; do
+#     pushd $d
+#     sh run.sh
+#     popd
+# done

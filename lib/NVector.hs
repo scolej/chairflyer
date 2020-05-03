@@ -15,6 +15,9 @@ earthRadius = 6378137
 
 type NVec = Vec3
 
+northPole :: NVec
+northPole = Vec3 1 0 0
+
 -- Latitude & longitude in radians or degrees.
 -- FIXME Use an angle type you fool.
 type LatLon = (Double, Double)
@@ -43,7 +46,7 @@ destination :: NVec -> Double -> Double -> NVec
 destination s h dist = (cos t `scalev3` s) `addv3` (sin t `scalev3` d)
   where t = dist / earthRadius
         d = (cos h `scalev3` n) `addv3` (sin h `scalev3` e)
-        e = unitv3 $ Vec3 1 0 0 `crossv3` s
+        e = unitv3 $ northPole `crossv3` s
         n = s `crossv3` e
 
 -- | Wrap an angle into the range 0 to 2 pi.
@@ -51,4 +54,8 @@ wrapHeading :: Double -> Double
 wrapHeading h = h `mod'` (2 * pi)
 
 initialHeading :: NVec -> NVec -> Double
-initialHeading a b = 0
+initialHeading a b =
+  let c = crossv3 a b
+      d = crossv3 a northPole
+      e = 0
+  in e -- FIXME

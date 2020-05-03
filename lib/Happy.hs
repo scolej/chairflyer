@@ -17,6 +17,12 @@ data Test =
 infixr 1 @@@
 (@@@) = Test
 
+-- FIXME Maybe description should be a list of strings.
+prefixTests :: String -> [Test] -> [Test]
+prefixTests p ts = map f ts
+  where f t = let d0 = testDescription t
+              in t { testDescription = p ++ ": " ++ d0 }
+
 -- | Add some indentation to every line.
 indent :: Int -> [String] -> [String]
 indent i = map ((++) (take i $ repeat ' '))
@@ -56,11 +62,11 @@ assertDouble tol e a =
   if eqDoub tol e a
   then Nothing
   else Just [ "actual value was not within tolerance of expected value"
-            , printf "tolerance        : %10.3g" tol
-            , printf "expected (lower) : %10.3g" (e - tol)
-            , printf "expected (middle): %10.3g" e
-            , printf "expected (upper) : %10.3g" (e + tol)
-            , printf "actual           : %10.3g" a
+            , printf "tolerance        : %10.3e" tol
+            , printf "expected (lower) : %10.3e" (e - tol)
+            , printf "expected (middle): %10.3e" e
+            , printf "expected (upper) : %10.3e" (e + tol)
+            , printf "actual           : %10.3e" a
             ]
 
 eqLL :: LatLon -> LatLon -> Bool

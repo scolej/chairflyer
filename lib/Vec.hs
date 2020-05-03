@@ -1,9 +1,5 @@
 module Vec where
 
-import Data.List
-import Test.HUnit
-import Handy
-
 data Vec2 =
   Vec2 Double Double
   deriving (Eq, Show)
@@ -118,38 +114,3 @@ radTwixtv2 a b
     d = (dotv2 a b) / (ma * mb)
     ma = magv2 a
     mb = magv2 b
-
--- FIXME convert these!!
-
-assertFloating :: Double -> Double -> Assertion
-assertFloating expected actual =
-  if abs (expected - actual) > 1e-7
-    then assertFailure $
-         intercalate "\n" ["expected: " ++ show expected, "     got: " ++ show actual]
-    else return ()
-
-radTwixtv2Tests :: Test
-radTwixtv2Tests =
-  TestList
-    [ "orthogonal anti-clockwise" ~:
-      assertFloating (degToRad (-90)) (radTwixtv2 (Vec2 0 1) (Vec2 1 0))
-    , "orthogonal clockwise" ~:
-      assertFloating (degToRad 90) (radTwixtv2 (Vec2 1 0) (Vec2 0 1))
-    , "opposites" ~:
-      assertFloating (degToRad 180) (radTwixtv2 (Vec2 (-1) (-1)) (Vec2 1 1))
-    , "arbitrary acute angle 1" ~:
-      assertFloating (degToRad 45) (radTwixtv2 (Vec2 1 1) (Vec2 0 1))
-    , "arbitrary acute angle 2" ~:
-      assertFloating (degToRad 45) (radTwixtv2 (Vec2 1 (-1)) (Vec2 1 0))
-    , "arbitrary obtuse angle 1" ~:
-      assertFloating (degToRad 135) (radTwixtv2 (Vec2 1 (-1)) (Vec2 0 1))
-    , "arbitrary obtuse angle 2" ~:
-      assertFloating (degToRad 135) (radTwixtv2 (Vec2 (-1) (-1)) (Vec2 1 0))
-    , "zero 1" ~: assertFloating 0 (radTwixtv2 (Vec2 1 0) (Vec2 1 0))
-    , "zero 2" ~: assertFloating 0 (radTwixtv2 (Vec2 0 0) (Vec2 1 0))
-    , "zero 3" ~: assertFloating 0 (radTwixtv2 (Vec2 1 0) (Vec2 0 0))
-    ]
-
---
---
---
