@@ -63,8 +63,8 @@ initialHeadingTests =
   let ini a b e = assertDouble 1e-6 e $
                        radToDeg (initialHeading (llDegToNVec a) (llDegToNVec b))
   in prefixTests "initial heading"
-     [ "to the north pole" @@@ ini (0, 0) (-90, 0) 0
-     , "to the south pole" @@@ ini (0, 0) (90, 0) 180
+     [ "to the north pole" @@@ ini (0, 0) (90, 0) 0
+     , "to the south pole" @@@ ini (0, 0) (-90, 0) 180
      , "to the east" @@@ ini (0, 0) (0, 1) 90
      , "to the west" @@@ ini (0, 0) (0, (-1)) 270
      ]

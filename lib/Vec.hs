@@ -14,6 +14,9 @@ zerov2 = Vec2 0 0
 zerov3 :: Vec3
 zerov3 = Vec3 0 0 0
 
+isZerov3 :: Vec3 -> Bool
+isZerov3 = (==) zerov3
+
 zipv3 :: (Double -> Double -> Double) -> Vec3 -> Vec3 -> Vec3
 zipv3 f (Vec3 ax ay az) (Vec3 bx by bz) = Vec3 (f ax bx) (f ay by) (f az bz)
 
@@ -93,6 +96,9 @@ crossv2 (Vec2 ax ay) (Vec2 bx by) = Vec3 0 0 (ax * by - ay * bx)
 dotv2 :: Vec2 -> Vec2 -> Double
 dotv2 (Vec2 ax ay) (Vec2 bx by) = ax * bx + ay * by
 
+dotv3 :: Vec3 -> Vec3 -> Double
+dotv3 (Vec3 ax ay az) (Vec3 bx by bz) = ax * bx + ay * by + az * bz
+
 sign :: Double -> Double
 sign x
   | x > 0 = 1
@@ -114,3 +120,15 @@ radTwixtv2 a b
     d = (dotv2 a b) / (ma * mb)
     ma = magv2 a
     mb = magv2 b
+
+-- | Find the signed angle between two vectors 'a' and 'n', looking along 'n'.
+-- Positive angles are anti-clockwise.
+radTwixtv3 :: Vec3 -> Vec3 -> Vec3 -> Double
+radTwixtv3 n a b
+  | any isZerov3 [n, a, b] = 0
+  | otherwise =
+    let ua = unitv3 a
+        ub = unitv3 b
+        m = acos $ ua `dotv3` ub
+        s = if crossv3 ua ub `dotv3` n <= 0 then 1 else (-1)
+    in m * s

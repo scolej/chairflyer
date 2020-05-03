@@ -13,6 +13,7 @@ earthRadius = 6378137
 -- THE JOURNAL OF NAVIGATION
 -- 2010
 
+-- An n-vector should always have unit length.
 type NVec = Vec3
 
 northPole :: NVec
@@ -57,5 +58,4 @@ initialHeading :: NVec -> NVec -> Double
 initialHeading a b =
   let c = crossv3 a b
       d = crossv3 a northPole
-      e = 0
-  in e -- FIXME
+  in wrapHeading $ radTwixtv3 a d c

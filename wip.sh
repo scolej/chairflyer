@@ -1,7 +1,7 @@
 set -e
 set -x
 
-stack build --test
+stack build chairflyer:test:tests
 
 exit 0
 
