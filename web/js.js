@@ -12,7 +12,7 @@ var map = new ol.Map({
     view: new ol.View({
         center: ol.proj.fromLonLat([145.365335, -37.698329]),
         rotation: Math.PI / 180 * -8,
-        zoom: 14,
+        zoom: 13.2,
     }),
     interactions: [],
     controls: []
@@ -44,14 +44,33 @@ window.addEventListener("load", function() {
 
     var s = new WebSocket("ws://127.0.0.1:8000", "protocolOne");
     s.onmessage = function (event) {
-        console.log(event.data);
         var j = JSON.parse(event.data);
         setAltitude(j.rAltitude)
         setAirspeed(j.rAirspeed)
+
+        // FIXME would be great if these adjustments could be a bit smoother
+        // maybe have a little plane which jumps
+        // but the map smoothly chases the plane
         map.getView().setCenter(ol.proj.fromLonLat([j.rLatLon[1], j.rLatLon[0]]));
+        var z = 14 - 3 / 10000 * j.rAltitude;
+        map.getView().setZoom(z);
         map.getView().setRotation(-j.rHeadingRad);
-        // TODO Set zoom based on altitude
     }
+
+    document.addEventListener("keydown", function(event) {
+        if (event.key === "ArrowLeft") {
+            s.send("l5");
+        }
+        if (event.key === "ArrowRight") {
+            s.send("r5");
+        }
+        if (event.key === "ArrowUp") {
+            s.send("pd1");
+        }
+        if (event.key === "ArrowDown") {
+            s.send("pu1");
+        }
+    });
 
     document.getElementById("inputBox").addEventListener("keyup", function(event) {
         if (event.key === "Enter") {

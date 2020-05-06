@@ -6,6 +6,11 @@ import Vec
 import NVector
 import LiftDrag
 
+-- FIXME
+-- We seem to steady out WAY too fast.
+-- Is airspeed indicator wrong?
+-- Or is model wrong? Need tests for basic performance cases.
+
 -- | Aircraft state variables
 data AcState =
   AcState
@@ -121,6 +126,7 @@ acStep :: Double -> AcRate -> AcState -> AcState
 acStep dt r s =
   s { acTime = acTime s + dt
     , acAltitude = acAltitude s + dt * vz
+    -- FIXME need to take into account altitude: rescale vx to surface speed
     , acTrack = (p0, h, d0 + vx * dt)
     , acVel = acVel s `addv2` (dt `scalev2` acrAcc r )
     , acMass = acMass s + acrMass r

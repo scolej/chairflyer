@@ -70,16 +70,34 @@ instance ToJSON Response where
 
 instance FromJSON Response
 
+-- FIXME These heading changes are wrong. Need to use final heading to
+-- get the adjusted heading at end of track.
+
 newHeading :: Double -> AcState -> AcState
 newHeading deg s0 = s0 { acTrack = (p, h, 0) }
   where (p0, h0, d) = acTrack s0
         p = destination p0 h0 d
         h = degToRad deg
 
+turn :: Double -> AcState -> AcState
+turn deg s0 = s0 { acTrack = (p, h, 0) }
+  where (p0, h0, d) = acTrack s0
+        p = destination p0 h0 d
+        h = degToRad deg + h0
+
+adjustPitch :: Double -> AcState -> AcState
+adjustPitch deg s0 = s0 { acPitch = p }
+  where p0 = acPitch s0
+        p = degToRad deg + p0
+
 parseMessage :: String -> AcSystem -> AcSystem
+parseMessage ('p':'u':rest) = updateState $ adjustPitch $ read rest
+parseMessage ('p':'d':rest) = updateState $ adjustPitch $ (-1) * read rest
 parseMessage ('p':rest) = updateState (\a -> a { acPitch = degToRad $ read rest })
-parseMessage ('t':rest) = updateState (\a -> a { acThrottle = read rest })
-parseMessage ('h':rest) = updateState (newHeading $ read rest)
+parseMessage ('t':rest) = updateState (\a -> a { acThrottle = read rest / 100 })
+parseMessage ('h':rest) = updateState $ newHeading $ read rest
+parseMessage ('r':rest) = updateState $ turn $ read rest
+parseMessage ('l':rest) = updateState (turn $ (-1) * read rest)
 parseMessage _ = id
 
 port :: Int
