@@ -3,13 +3,15 @@ module AcState where
 import Atmosphere
 import Handy
 import Vec
+import NVector
 import LiftDrag
 
 -- | Aircraft state variables
 data AcState =
   AcState
     { acTime :: Double -- ^ Absolute time
-    , acPos :: Vec3 -- ^ Position in 3D space
+    , acAltitude :: Double -- ^ Height above sea level, metres
+    , acTrack :: (NVec, Double, Double) -- ^ Position, heading, distance travelled
     , acVel :: Vec2 -- ^ 2D velocity, longitudinal & vertical
     , acMass :: Double -- ^ Mass of aircraft
     , acHeading :: Double -- ^ Aircraft heading, radians
@@ -86,7 +88,7 @@ acRate atmos props _ s =
   where
     v = magv2 (acVel s)
     weight = Vec2 0 (-9.81 * acMass s)
-    Vec3 _ _ h = acPos s
+    h = acAltitude s
     onGround = h < 0.1
     rho = (atmosDensity . atmos) h
     q = 0.5 * rho * v * v
@@ -106,28 +108,26 @@ alpha s = radTwixtv2 (acUnitVelForward s) (acUnitForward s)
 
 -- | Make sure we can't fly underground.
 acClip :: AcState -> AcState
-acClip s = s { acPos = p
+acClip s = s { acAltitude = p
              , acVel = v
              }
-  where Vec3 x y z = acPos s
+  where z = acAltitude s
         underground = z < 0
         Vec2 vx vz = acVel s
-        p = Vec3 x y (if underground then 0 else z)
+        p = if underground then 0 else z
         v = Vec2 vx (if underground then 0 else vz)
 
 acStep :: Double -> AcRate -> AcState -> AcState
 acStep dt r s =
   s { acTime = acTime s + dt
-    , acPos = acPos s `addv3` (dt `scalev3` vel3)
+    , acAltitude = acAltitude s + dt * vz
+    , acTrack = (p0, h, d0 + vx * dt)
     , acVel = acVel s `addv2` (dt `scalev2` acrAcc r )
     , acMass = acMass s + acrMass r
     }
   where
     Vec2 vx vz = acrVel r
-    h = acHeading s
-    -- Hack to propagate 2D velocity through 3D space.
-    -- Need to worry about great circles & rhumb lines.
-    vel3 = Vec3 (vx * sin h) (vx * cos h) vz
+    (p0, h, d0) = acTrack s
 
 hackyJab :: AcProps
 hackyJab =

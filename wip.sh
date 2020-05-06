@@ -1,13 +1,11 @@
 set -e
 set -x
 
-stack build chairflyer:test:tests
+stack build chairflyer:exe:webserv
+# stack build chairflyer:test:tests
 
+stack exec webserv
 exit 0
-
-# if [[ $? -eq 0 ]]; then
-# stack exec webserv &
-# PID=$!
 
 # Directories waiting to be incorporated into the Stack build.
 HACKS=

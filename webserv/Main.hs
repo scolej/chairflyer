@@ -14,6 +14,7 @@ import Handy
 import Integrators
 import Units
 import Vec
+import NVector
 import qualified Network.WebSockets as WS
 
 --
@@ -34,7 +35,8 @@ startState :: AcSystem
 startState =
     let ac0 =
           AcState { acTime = 0
-                  , acPos = zerov3
+                  , acAltitude = 0
+                  , acTrack = (llDegToNVec (-37.698329, 145.365335), degToRad 8, 0)
                   , acVel = Vec2 0 0
                   , acMass = acpMass hackyJab
                   , acHeading = 0
@@ -59,6 +61,8 @@ simpleSim var = forever go
 data Response =
   Response { rAltitude :: Double
            , rAirspeed :: Double
+           , rLatLon :: LatLon
+           , rHeadingRad :: Double
            } deriving (Generic, Show)
 
 instance ToJSON Response where
@@ -66,9 +70,16 @@ instance ToJSON Response where
 
 instance FromJSON Response
 
+newHeading :: Double -> AcState -> AcState
+newHeading deg s0 = s0 { acTrack = (p, h, 0) }
+  where (p0, h0, d) = acTrack s0
+        p = destination p0 h0 d
+        h = degToRad deg
+
 parseMessage :: String -> AcSystem -> AcSystem
 parseMessage ('p':rest) = updateState (\a -> a { acPitch = degToRad $ read rest })
 parseMessage ('t':rest) = updateState (\a -> a { acThrottle = read rest })
+parseMessage ('h':rest) = updateState (newHeading $ read rest)
 parseMessage _ = id
 
 port :: Int
@@ -88,10 +99,14 @@ app var pending = do
   let send = do
         s <- atomically $ readTVar var
         let ac = sysState s
-            Vec3 _ _ z = acPos ac
+            z = acAltitude ac
             v = acVel ac
+            (p0, h, d) = acTrack ac
+            ll = nvecToLLDeg $ destination p0 h d
             resp = Response { rAltitude = mToFt z
                             , rAirspeed = mpsToKnots (magv2 v)
+                            , rLatLon = ll
+                            , rHeadingRad = h
                             }
         WS.sendTextData conn $ encode resp
         threadDelaySec simTimeStep
