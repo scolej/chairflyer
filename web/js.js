@@ -1,3 +1,25 @@
+var map = new ol.Map({
+    layers: [
+        new ol.layer.Tile({
+            source: new ol.source.OSM({
+                crossOrigin: null,
+                // FIXME terms of use?
+                url: "https://tiles.wmflabs.org/osm-no-labels/{z}/{x}/{y}.png"
+            })
+        })
+    ],
+    target: 'map',
+    view: new ol.View({
+        center: ol.proj.fromLonLat([145.365335, -37.698329]),
+        rotation: Math.PI / 180 * -8,
+        zoom: 15,
+    }),
+    interactions: [],
+    controls: []
+});
+
+/////
+
 function setRotation(elt, deg) {
     elt.setAttributeNS(null, 'transform', 'rotate(' + deg + ')');
 }

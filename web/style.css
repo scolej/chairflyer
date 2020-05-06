@@ -1,0 +1,10 @@
+#instruments {
+    margin: auto;
+    max-height: 20em;;
+}
+
+#inputBox {
+    display: block;
+    margin: auto;
+    max-width: 20em;
+}
