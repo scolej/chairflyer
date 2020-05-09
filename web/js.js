@@ -31,7 +31,7 @@ var map = new ol.Map({
                 url: "https://tiles.wmflabs.org/osm-no-labels/{z}/{x}/{y}.png"
             })
         }),
-        vectorLayer
+        vectorLayer,
     ],
     target: 'map',
     view: new ol.View({
@@ -63,56 +63,56 @@ function setAltitude(ft) {
     setRotation(svg.getElementById("thousands"), ts)
 }
 
+function showInstruments() {
+    document.getElementById("instruments").style.display = 'block';
+}
+
+function hideInstruments() {
+    document.getElementById("instruments").style.display = 'none';
+}
+
 var i = 0;
 window.addEventListener("load", function() {
 
     setAirspeed(0);
     setAltitude(0);
 
-    var mapRot = 0;
-
     var s = new WebSocket("ws://127.0.0.1:8000", "protocolOne");
     s.onmessage = function (event) {
         i += 1;
+
         var j = JSON.parse(event.data);
+
         setAltitude(j.rAltitude)
         setAirspeed(j.rAirspeed)
 
-        // FIXME would be great if these adjustments could be a bit smoother
-        // maybe have a little plane which jumps
-        // but the map smoothly chases the plane
         var pos = ol.proj.fromLonLat([j.rLatLon[1], j.rLatLon[0]])
 
-
-        if (i % 15 == 0) {
-            mapRot = -j.rHeadingRad;
+        if (i % 3 == 0) {
             var z = 14 - 3 / 10000 * j.rAltitude;
 
-            map.getView().setCenter(pos);
-            map.getView().setZoom(z);
-            map.getView().setRotation(mapRot);
-
-            // map.getView().animate({
-            //     center: pos,
-            //     rotation: mapRot,
-            //     zoom: z,
-            //     duration: 1000
-            // });
+            map.setView(new ol.View({
+                center: pos,
+                rotation: -j.rHeadingRad,
+                zoom: z,
+            }));
+            icon.setGeometry(new ol.geom.Point(pos));
         }
-
-        icon.setGeometry(new ol.geom.Point(pos));
-        iconStyle.getImage().setRotation(mapRot + j.rHeadingRad);
 
         // FIXME should allow tapping on map for pitch & heading
     }
 
+    document.addEventListener("keyup", function(event) {
+        if (event.key === " ") {
+            hideInstruments();
+        }
+    });
+
     document.addEventListener("keydown", function(event) {
         if (event.key === "ArrowLeft") {
             s.send("l5");
-            i = 0;
         }
         if (event.key === "ArrowRight") {
-            i = 0;
             s.send("r5");
         }
         if (event.key === "ArrowUp") {
@@ -120,6 +120,10 @@ window.addEventListener("load", function() {
         }
         if (event.key === "ArrowDown") {
             s.send("pu1");
+        }
+        if (event.key === " ") {
+            console.log('down');
+            showInstruments();
         }
     });
 

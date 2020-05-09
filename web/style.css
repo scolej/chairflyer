@@ -1,6 +1,11 @@
 #instruments {
     margin: auto;
-    max-height: 20em;;
+    max-height: 20em;
+    display: none;
+    position: absolute;
+    bottom: 0px;
+    left: 0;
+    right: 0;
 }
 
 #inputBox {
