@@ -2,9 +2,10 @@ module AcState where
 
 import Atmosphere
 import Handy
-import Vec
-import NVector
 import LiftDrag
+import NVector
+import Prop
+import Vec
 
 -- FIXME
 -- We seem to steady out WAY too fast.
@@ -38,7 +39,8 @@ data AcProps =
     { acpMass :: Double
     , acpLiftingArea :: Double
     , acpDraggingArea :: Double
-    , acpMaxThrust :: Double
+    , acpMaxPropRpm :: Double
+    , acpPropD :: Double
     }
   deriving (Show)
 
@@ -71,17 +73,6 @@ acUnitVelUp :: AcState -> Vec2
 acUnitVelUp s = Vec2 (-y) x
   where Vec2 x y = acUnitVelForward s
 
--- | Make a rough estimate of how much thrust is available.
--- Nothing about this is correct.
--- As velocity increases thrust should go to 0: fixed pitch propellor performs worse and worse.
--- As density decreases thrust should go to 0: less oxygen to burn, less density to push.
--- Don't go below zero.
-hackyThrustAvailable :: Double -> Double -> Double -> Double
-hackyThrustAvailable maxThrust density v = clip 0 maxThrust t
-  where a = rescale 0 120 1 0 v
-        b = rescale 1.225 0.9 1 0 density
-        t = maxThrust * a * b
-
 -- FIXME if we don't use dt, is there any advantage to using RK4?
 acRate :: (Double -> Atmosphere) -> AcProps -> Double -> AcState -> AcRate
 acRate atmos props _ s =
@@ -101,10 +92,11 @@ acRate atmos props _ s =
     aoa = alpha s
     ar = 7.4
     (cl, cd) = liftDrag ar aoa
-    groundDrag = if onGround then 400 else 0 -- TODO Could be better.
+    groundDrag = if onGround then 20 else 0 -- TODO Could be better.
     dragMag = (q * cd * (acpDraggingArea props)) + groundDrag
     drag = dragMag`scalev2` acUnitVelBack s -- TODO Could be better, ground drag is not in the same direction.
-    thrust = acThrottle s * hackyThrustAvailable (acpMaxThrust props) rho v
+    rpm = acThrottle s * acpMaxPropRpm props
+    thrust = propThrust (acpPropD props) rho (rpmToRps rpm) v
     thrustv = thrust `scalev2` acUnitForward s
 
 -- | Compute angle of attack.
@@ -139,9 +131,10 @@ hackyJab :: AcProps
 hackyJab =
   AcProps
     { acpMass = 540
-    , acpLiftingArea = 10
-    , acpDraggingArea = 2
-    , acpMaxThrust = 1000
+    , acpLiftingArea = 6.9
+    , acpDraggingArea = 4
+    , acpMaxPropRpm = 3100
+    , acpPropD = 1.524
     }
 
 -- | Rate of change function for the hacky Jabiru in standard atmosphere.

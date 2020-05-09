@@ -12,7 +12,8 @@ s0 :: AcState
 s0 =
   AcState { acTime = 0
           , acThrottle = 1
-          , acPos = zerov3
+          , acAltitude = 0
+          , acTrack = (zerov3, 0, 0)
           , acVel = Vec2 0 0
           , acMass = acpMass hackyJab
           , acHeading = 0
@@ -53,7 +54,7 @@ speedChanger = Controller $
   \dt s0 -> let Controller c =
                     if acTime s0 < 600
                     then airspeedController (knotsToMps 65)
-                    else airspeedController (knotsToMps 100)
+                    else airspeedController (knotsToMps 80)
                 -- FIXME Under this arrangement we get lucky because 'airspeedController'
                 -- doesn't carry any state. How to compose controllers like this _and_
                 -- pipe their own state along?
@@ -74,12 +75,12 @@ histSpeedChanger =
 
 showState :: AcState -> [String]
 showState s =
-  let Vec3 x y z = acPos s
+  let z = acAltitude s
       Vec2 vx vz = acVel s
       t = acTime s
       p = radToDeg $ acPitch s
       a = radToDeg $ alpha s
-  in map sci [t, x, y, mToFt z, mpsToKnots vx, mpsToFpm vz, p, a]
+  in map sci [t, mToFt z, mpsToKnots vx, mpsToFpm vz, p, a]
 
 main :: IO ()
 main = do

@@ -1,3 +1,7 @@
+body {
+    margin: 0;
+}
+
 #instruments {
     margin: auto;
     max-height: 20em;
@@ -12,4 +16,8 @@
     display: block;
     margin: auto;
     max-width: 20em;
+    position: absolute;
+    top: 5px;
+    left: 0;
+    right: 0;
 }

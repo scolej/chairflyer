@@ -17,4 +17,4 @@ liftDrag ar aoa = (cl, cd)
          else if aa < radS0 then g * rescale radStall radS0 clMax 0 aa
          else 0
     cd = if aa < radStall then d cl
-         else rescale radStall (degToRad 180) cdS (cdS * 2) aa
+         else rescale radStall (degToRad 180) cdS (cdS * 4) aa
