@@ -12,6 +12,19 @@ import Vec
 -- Is airspeed indicator wrong?
 -- Or is model wrong? Need tests for basic performance cases.
 
+-- FIXME
+reStd
+  :: Double -- ^ Velocity
+  -> Double -- ^ Altitude, metres
+  -> Double -- ^ Reynolds number
+reStd v z  = rho * v * d / mu
+ where mu = 18.5e-6 -- FIXME double check
+       rho = 1
+       d = 1
+--
+--
+--
+
 -- | Aircraft state variables
 data AcState =
   AcState
@@ -93,8 +106,10 @@ acRate atmos props _ s =
     ar = 7.4
     (cl, cd) = liftDrag ar aoa
     groundDrag = if onGround then 20 else 0 -- TODO Could be better.
-    dragMag = (q * cd * (acpDraggingArea props)) + groundDrag
-    drag = dragMag`scalev2` acUnitVelBack s -- TODO Could be better, ground drag is not in the same direction.
+    -- FIXME what area to use for drag? wing or frontal?
+    -- dragMag = (q * cd * (acpDraggingArea props)) + groundDrag
+    dragMag = (q * cd * (acpLiftingArea props)) + groundDrag
+    drag = dragMag `scalev2` acUnitVelBack s -- TODO Could be better, ground drag is not in the same direction.
     rpm = acThrottle s * acpMaxPropRpm props
     thrust = propThrust (acpPropD props) rho (rpmToRps rpm) v
     thrustv = thrust `scalev2` acUnitForward s

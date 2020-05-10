@@ -2,9 +2,10 @@ import Output
 import Prop
 
 kcs :: [[Double]]
-kcs = map f [0,5..100]
-  where f v = let j = v / (rpmToRps 3100) / 1.5
-              in [j, thrustCoeff j]
+kcs = map f [0,0.01..1.0]
+  where f j = [j, thrustCoeff re mtip j]
+        re = 1 -- FIXME
+        mtip = 0.6
 
 vs :: [[Double]]
 vs = map (\v -> [v, propThrust 1.5 1.225 (rpmToRps 2800) v]) [0,5..100]
