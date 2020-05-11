@@ -63,6 +63,12 @@ function setAltitude(ft) {
     setRotation(svg.getElementById("thousands"), ts)
 }
 
+function setTacho(rpm) {
+    var deg = (rpm / 4000 * 0.8 + 0.1) * 360;
+    var svg = document.getElementById("instruments");
+    setRotation(svg.getElementById("hand"), deg)
+}
+
 function showInstruments() {
     document.getElementById("instruments").style.display = 'block';
 }
@@ -85,6 +91,7 @@ window.addEventListener("load", function() {
 
         setAltitude(j.rAltitude)
         setAirspeed(j.rAirspeed)
+        setTacho(j.rRpm)
 
         var pos = ol.proj.fromLonLat([j.rLatLon[1], j.rLatLon[0]])
 
@@ -109,6 +116,12 @@ window.addEventListener("load", function() {
     });
 
     document.addEventListener("keydown", function(event) {
+        if (event.key === "w") {
+            s.send("th+");
+        }
+        if (event.key === "s") {
+            s.send("th-");
+        }
         if (event.key === "ArrowLeft") {
             s.send("l5");
         }

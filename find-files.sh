@@ -1,4 +1,4 @@
-find lib test webserv \
+find lib test webserv handy \
      -iname \*.hs \
      -or -iname \*.plt \
      -or -iname \*.sh \

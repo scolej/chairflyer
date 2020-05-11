@@ -63,6 +63,7 @@ data Response =
            , rAirspeed :: Double
            , rLatLon :: LatLon
            , rHeadingRad :: Double
+           , rRpm :: Double
            } deriving (Generic, Show)
 
 instance ToJSON Response where
@@ -90,7 +91,14 @@ adjustPitch deg s0 = s0 { acPitch = p }
   where p0 = acPitch s0
         p = degToRad deg + p0
 
+adjustThrottle :: Double -> AcState -> AcState
+adjustThrottle delta s0 = s0 { acThrottle = t }
+  where t0 = acThrottle s0
+        t = min 1 $ t0 + delta / 100
+
 parseMessage :: String -> AcSystem -> AcSystem
+parseMessage ('t':'h':'+':[]) = updateState (adjustThrottle 2)
+parseMessage ('t':'h':'-':[]) = updateState (adjustThrottle (-2))
 parseMessage ('p':'u':rest) = updateState $ adjustPitch $ read rest
 parseMessage ('p':'d':rest) = updateState $ adjustPitch $ (-1) * read rest
 parseMessage ('p':rest) = updateState (\a -> a { acPitch = degToRad $ read rest })
@@ -125,6 +133,7 @@ app var pending = do
                             , rAirspeed = mpsToKnots (magv2 v)
                             , rLatLon = ll
                             , rHeadingRad = h
+                            , rRpm = acThrottle ac * acpMaxPropRpm hackyJab
                             }
         WS.sendTextData conn $ encode resp
         threadDelaySec simTimeStep
