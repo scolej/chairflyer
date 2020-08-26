@@ -41,7 +41,9 @@ startState =
                   , acMass = acpMass hackyJab
                   , acHeading = 0
                   , acPitch = degToRad 10
-                  , acThrottle = 1
+                  -- Massive FIXME - if I make this 0 everything goes haywire
+                  -- div by 0 somewhere?
+                  , acThrottle = 0.1
                   }
     in AcSystem { sysState = ac0
                 , sysController = idController
@@ -94,7 +96,7 @@ adjustPitch deg s0 = s0 { acPitch = p }
 adjustThrottle :: Double -> AcState -> AcState
 adjustThrottle delta s0 = s0 { acThrottle = t }
   where t0 = acThrottle s0
-        t = min 1 $ t0 + delta / 100
+        t = max 0 $ min 1 $ t0 + delta / 100
 
 parseMessage :: String -> AcSystem -> AcSystem
 parseMessage ('t':'h':'+':[]) = updateState (adjustThrottle 2)

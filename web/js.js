@@ -20,7 +20,9 @@ var vectorLayer = new ol.layer.Vector({
   source: vectorSource
 });
 
-/////
+//
+//
+//
 
 var map = new ol.Map({
     layers: [
@@ -43,7 +45,9 @@ var map = new ol.Map({
     controls: []
 });
 
-/////
+//
+//
+//
 
 function setRotation(elt, deg) {
     elt.setAttributeNS(null, 'transform', 'rotate(' + deg + ')');
@@ -83,6 +87,7 @@ window.addEventListener("load", function() {
     setAirspeed(0);
     setAltitude(0);
 
+    // FIXME don't hardcode server location
     var s = new WebSocket("ws://127.0.0.1:8000", "protocolOne");
     s.onmessage = function (event) {
         i += 1;
@@ -95,16 +100,14 @@ window.addEventListener("load", function() {
 
         var pos = ol.proj.fromLonLat([j.rLatLon[1], j.rLatLon[0]])
 
-        if (i % 3 == 0) {
-            var z = 14 - 3 / 10000 * j.rAltitude;
+        var z = 14 - 3 / 10000 * j.rAltitude;
 
-            map.setView(new ol.View({
-                center: pos,
-                rotation: -j.rHeadingRad,
-                zoom: z,
-            }));
-            icon.setGeometry(new ol.geom.Point(pos));
-        }
+        map.setView(new ol.View({
+            center: pos,
+            rotation: -j.rHeadingRad,
+            zoom: z,
+        }));
+        icon.setGeometry(new ol.geom.Point(pos));
 
         // FIXME should allow tapping on map for pitch & heading
     }

@@ -1,9 +1,9 @@
 set -e
 set -x
 
-# stack build chairflyer
+stack build chairflyer
 # stack build chairflyer:lib
-stack build chairflyer:exe:webserv
+# stack build chairflyer:exe:webserv
 # stack build chairflyer:test:tests
 
 stack exec webserv
