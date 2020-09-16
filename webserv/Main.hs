@@ -9,6 +9,7 @@ import Control.Monad
 import Controller
 import Data.Aeson
 import Data.Text
+import Data.Fixed
 import GHC.Generics
 import Handy
 import Integrators
@@ -82,11 +83,14 @@ newHeading deg s0 = s0 { acTrack = (p, h, 0) }
         p = destination p0 h0 d
         h = degToRad deg
 
+wrapHeadingRad :: Double -> Double
+wrapHeadingRad r = mod' r (2 * pi)
+
 turn :: Double -> AcState -> AcState
 turn deg s0 = s0 { acTrack = (p, h, 0) }
   where (p0, h0, d) = acTrack s0
         p = destination p0 h0 d
-        h = degToRad deg + h0
+        h = wrapHeadingRad (degToRad deg + h0)
 
 adjustPitch :: Double -> AcState -> AcState
 adjustPitch deg s0 = s0 { acPitch = p }

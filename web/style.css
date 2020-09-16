@@ -12,12 +12,3 @@ body {
     right: 0;
 }
 
-#inputBox {
-    display: block;
-    margin: auto;
-    max-width: 20em;
-    position: absolute;
-    top: 5px;
-    left: 0;
-    right: 0;
-}

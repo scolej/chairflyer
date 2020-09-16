@@ -51,7 +51,6 @@ data AcProps =
   AcProps
     { acpMass :: Double
     , acpLiftingArea :: Double
-    , acpDraggingArea :: Double
     , acpMaxPropRpm :: Double
     , acpPropD :: Double
     }
@@ -106,8 +105,6 @@ acRate atmos props _ s =
     ar = 7.4
     (cl, cd) = liftDrag ar aoa
     groundDrag = if onGround then 20 else 0 -- TODO Could be better.
-    -- FIXME what area to use for drag? wing or frontal?
-    -- dragMag = (q * cd * (acpDraggingArea props)) + groundDrag
     dragMag = (q * cd * (acpLiftingArea props)) + groundDrag
     drag = dragMag `scalev2` acUnitVelBack s -- TODO Could be better, ground drag is not in the same direction.
     rpm = acThrottle s * acpMaxPropRpm props
@@ -147,7 +144,6 @@ hackyJab =
   AcProps
     { acpMass = 540
     , acpLiftingArea = 6.9
-    , acpDraggingArea = 4
     , acpMaxPropRpm = 3100
     , acpPropD = 1.524
     }

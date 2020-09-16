@@ -53,6 +53,10 @@ function setRotation(elt, deg) {
     elt.setAttributeNS(null, 'transform', 'rotate(' + deg + ')');
 }
 
+function setTranslate(elt, x, y) {
+    elt.setAttributeNS(null, 'transform', 'translate(' + x + ',' + y + ')');
+}
+
 function setAirspeed(knots) {
     var hs = (knots / 165) ** 2 * 360 - 180;
     var svg = document.getElementById("instruments");
@@ -71,6 +75,13 @@ function setTacho(rpm) {
     var deg = (rpm / 4000 * 0.8 + 0.1) * 360;
     var svg = document.getElementById("instruments");
     setRotation(svg.getElementById("hand"), deg)
+}
+
+function setMagneticCompass(rad) {
+    var deg = rad * 180 / Math.PI;
+    var x = (deg - 360) * 1.3;
+    var svg = document.getElementById("instruments");
+    setTranslate(svg.getElementById("compassStrip"), x, 0)
 }
 
 function showInstruments() {
@@ -94,11 +105,12 @@ window.addEventListener("load", function() {
 
         var j = JSON.parse(event.data);
 
-        setAltitude(j.rAltitude)
-        setAirspeed(j.rAirspeed)
-        setTacho(j.rRpm)
+        setAltitude(j.rAltitude);
+        setAirspeed(j.rAirspeed);
+        setTacho(j.rRpm);
+        setMagneticCompass(j.rHeadingRad);
 
-        var pos = ol.proj.fromLonLat([j.rLatLon[1], j.rLatLon[0]])
+        var pos = ol.proj.fromLonLat([j.rLatLon[1], j.rLatLon[0]]);
 
         var z = 14 - 3 / 10000 * j.rAltitude;
 
@@ -112,12 +124,6 @@ window.addEventListener("load", function() {
         // FIXME should allow tapping on map for pitch & heading
     }
 
-    document.addEventListener("keyup", function(event) {
-        if (event.key === " ") {
-            hideInstruments();
-        }
-    });
-
     document.addEventListener("keydown", function(event) {
         if (event.key === "w") {
             s.send("th+");
@@ -126,27 +132,16 @@ window.addEventListener("load", function() {
             s.send("th-");
         }
         if (event.key === "ArrowLeft") {
-            s.send("l5");
+            s.send("l1");
         }
         if (event.key === "ArrowRight") {
-            s.send("r5");
+            s.send("r1");
         }
         if (event.key === "ArrowUp") {
             s.send("pd1");
         }
         if (event.key === "ArrowDown") {
             s.send("pu1");
-        }
-        if (event.key === " ") {
-            console.log('down');
-            showInstruments();
-        }
-    });
-
-    document.getElementById("inputBox").addEventListener("keyup", function(event) {
-        if (event.key === "Enter") {
-            s.send(this.value);
-            this.value = "";
         }
     });
 })
