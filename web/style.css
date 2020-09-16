@@ -4,7 +4,7 @@ body {
 
 #instruments {
     margin: auto;
-    max-height: 20em;
+    max-height: 30em;
     /*display: none;*/
     position: absolute;
     bottom: 0px;

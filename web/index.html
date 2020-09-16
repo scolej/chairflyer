@@ -9,12 +9,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <body>
     <div id="map" style='height: 100%'></div>
+    <!-- FIXME Rationalize all coords -->
     <svg version="1.1"
-         viewBox="-100 -50 200 100"
+         viewBox="-100 -100 200 150"
          id="instruments"
          xmlns="http://www.w3.org/2000/svg">
       <style>
-        .asText, .asLabel, .tachoText {
+        .asText, .asLabel, .tachoText, .compassText {
             fill: white;
             font-family: "Arial Black", Gadget, sans-serif;
         }
@@ -26,6 +27,9 @@
         }
         .tachoText {
             font-size: 6px;
+        }
+        .compassText {
+            font-size: 15px;
         }
       </style>
       <g id="airspeed" transform='translate(-60,0)'>
@@ -127,6 +131,176 @@
         <text dominant-baseline='middle' text-anchor='middle' x='-0.0' y='-20.0' class='tachoText'>20</text>
         <text dominant-baseline='middle' text-anchor='middle' x='19.0' y='-6.2' class='tachoText'>30</text>
         <text dominant-baseline='middle' text-anchor='middle' x='11.8' y='16.2' class='tachoText'>40</text>
+      </g>
+      <!-- FIXME Fix so no need to scale -->
+      <g id="magneticCompass" transform='translate(0,-60) scale(0.333 0.333)'>
+        <mask id='windowMask'>
+          <rect x="-65" y="-40" height="80" width="130" rx="15" fill='white'/>
+        </mask>
+        <circle r="90" fill="#555"/>
+        <rect x="-65" y="-40" height="80" width="130" rx="15" fill="black"/>
+        <g mask="url(#windowMask)">
+          <polyline points="0,-40 0,40" stroke="white" stroke-width="2"/>
+          <!-- Function degrees to strip offset: (* 1.3 (- d 360)) -->
+          <g id='compassStrip' transform='translate(-422.5,0)'>
+            <polyline points='656.50,3.00 656.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='643.50,3.00 643.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='630.50,3.00 630.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='617.50,3.00 617.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='604.50,3.00 604.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='591.50,3.00 591.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='578.50,3.00 578.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='565.50,3.00 565.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='552.50,3.00 552.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='539.50,3.00 539.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='526.50,3.00 526.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='513.50,3.00 513.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='500.50,3.00 500.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='487.50,3.00 487.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='474.50,3.00 474.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='461.50,3.00 461.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='448.50,3.00 448.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='435.50,3.00 435.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='422.50,3.00 422.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='409.50,3.00 409.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='396.50,3.00 396.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='383.50,3.00 383.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='370.50,3.00 370.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='357.50,3.00 357.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='344.50,3.00 344.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='331.50,3.00 331.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='318.50,3.00 318.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='305.50,3.00 305.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='292.50,3.00 292.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='279.50,3.00 279.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='266.50,3.00 266.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='253.50,3.00 253.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='240.50,3.00 240.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='227.50,3.00 227.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='214.50,3.00 214.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='201.50,3.00 201.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='188.50,3.00 188.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='175.50,3.00 175.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='162.50,3.00 162.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='149.50,3.00 149.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='136.50,3.00 136.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='123.50,3.00 123.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='110.50,3.00 110.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='97.50,3.00 97.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='84.50,3.00 84.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='71.50,3.00 71.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='58.50,3.00 58.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='45.50,3.00 45.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='32.50,3.00 32.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='19.50,3.00 19.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='6.50,3.00 6.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-6.50,3.00 -6.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-19.50,3.00 -19.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-32.50,3.00 -32.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-45.50,3.00 -45.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-58.50,3.00 -58.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-71.50,3.00 -71.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-84.50,3.00 -84.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-97.50,3.00 -97.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-110.50,3.00 -110.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-123.50,3.00 -123.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-136.50,3.00 -136.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-149.50,3.00 -149.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-162.50,3.00 -162.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-175.50,3.00 -175.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-188.50,3.00 -188.50,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='650.00,-1.00 650.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='637.00,-1.00 637.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='611.00,-1.00 611.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='598.00,-1.00 598.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='572.00,-1.00 572.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='559.00,-1.00 559.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='533.00,-1.00 533.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='520.00,-1.00 520.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='494.00,-1.00 494.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='481.00,-1.00 481.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='455.00,-1.00 455.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='442.00,-1.00 442.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='416.00,-1.00 416.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='403.00,-1.00 403.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='377.00,-1.00 377.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='364.00,-1.00 364.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='338.00,-1.00 338.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='325.00,-1.00 325.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='299.00,-1.00 299.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='286.00,-1.00 286.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='260.00,-1.00 260.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='247.00,-1.00 247.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='221.00,-1.00 221.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='208.00,-1.00 208.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='182.00,-1.00 182.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='169.00,-1.00 169.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='143.00,-1.00 143.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='130.00,-1.00 130.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='104.00,-1.00 104.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='91.00,-1.00 91.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='65.00,-1.00 65.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='52.00,-1.00 52.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='26.00,-1.00 26.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='13.00,-1.00 13.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-13.00,-1.00 -13.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-26.00,-1.00 -26.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-52.00,-1.00 -52.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-65.00,-1.00 -65.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-91.00,-1.00 -91.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-104.00,-1.00 -104.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-130.00,-1.00 -130.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-143.00,-1.00 -143.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-169.00,-1.00 -169.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='-182.00,-1.00 -182.00,9.00' stroke-width='1.5' stroke='white'/>
+            <polyline points='663.00,-5.00 663.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='624.00,-5.00 624.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='585.00,-5.00 585.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='546.00,-5.00 546.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='507.00,-5.00 507.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='468.00,-5.00 468.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='429.00,-5.00 429.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='390.00,-5.00 390.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='351.00,-5.00 351.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='312.00,-5.00 312.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='273.00,-5.00 273.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='234.00,-5.00 234.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='195.00,-5.00 195.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='156.00,-5.00 156.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='117.00,-5.00 117.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='78.00,-5.00 78.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='39.00,-5.00 39.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='-0.00,-5.00 -0.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='-39.00,-5.00 -39.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='-78.00,-5.00 -78.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='-117.00,-5.00 -117.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='-156.00,-5.00 -156.00,9.00' stroke-width='2.1' stroke='white'/>
+            <polyline points='-195.00,-5.00 -195.00,9.00' stroke-width='2.1' stroke='white'/>
+            <text dominant-baseline='middle' text-anchor='middle' x='663.0' y='-12' class='compassText'>21</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='624.0' y='-12' class='compassText'>24</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='585.0' y='-12' class='compassText'>W</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='546.0' y='-12' class='compassText'>30</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='507.0' y='-12' class='compassText'>33</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='468.0' y='-12' class='compassText'>N</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='429.0' y='-12' class='compassText'>3</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='390.0' y='-12' class='compassText'>6</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='351.0' y='-12' class='compassText'>E</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='312.0' y='-12' class='compassText'>12</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='273.0' y='-12' class='compassText'>15</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='234.0' y='-12' class='compassText'>S</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='195.0' y='-12' class='compassText'>21</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='156.0' y='-12' class='compassText'>24</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='117.0' y='-12' class='compassText'>W</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='78.0' y='-12' class='compassText'>30</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='39.0' y='-12' class='compassText'>33</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='-0.0' y='-12' class='compassText'>N</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='-39.0' y='-12' class='compassText'>3</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='-78.0' y='-12' class='compassText'>6</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='-117.0' y='-12' class='compassText'>E</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='-156.0' y='-12' class='compassText'>12</text>
+            <text dominant-baseline='middle' text-anchor='middle' x='-195.0' y='-12' class='compassText'>15</text>
+          </g>
+        </g>
       </g>
     </svg>
     <input type="text" id="inputBox"/>
