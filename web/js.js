@@ -27,11 +27,12 @@ var vectorLayer = new ol.layer.Vector({
 var map = new ol.Map({
     layers: [
         new ol.layer.Tile({
-            source: new ol.source.OSM({
-                crossOrigin: null,
-                // FIXME terms of use?
-                url: "https://tiles.wmflabs.org/osm-no-labels/{z}/{x}/{y}.png"
-            })
+            source: new ol.source.BingMaps({
+                // FIXME
+                key: 'AovsTgObCx5ly8HLRLD-BGdJADMKIHGHa8Z9sAx9ld1vsgZuE4v1FH6e6OBcar8V',
+                imagerySet: 'Aerial',
+                maxZoom: 19
+            }),
         }),
         vectorLayer,
     ],
@@ -112,7 +113,7 @@ window.addEventListener("load", function() {
 
         var pos = ol.proj.fromLonLat([j.rLatLon[1], j.rLatLon[0]]);
 
-        var z = 14 - 3 / 10000 * j.rAltitude;
+        var z = 15 - 3 / 10000 * j.rAltitude;
 
         map.setView(new ol.View({
             center: pos,
