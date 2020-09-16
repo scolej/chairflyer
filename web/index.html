@@ -3,7 +3,7 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="style.css"/>
     <link rel="stylesheet" href="ol/ol.css"/>
-    <script src="ol/ol.js"></script>
+    <script src="ol/leaflet.js"></script>
     <script type="module" src="js.js"></script>
   </head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -98,9 +98,6 @@
       </g>
       <g id="tacho" transform='translate(60,0)'>
         <circle r="30" fill="black"/>
-        <polygon id="hand"
-                 points="-1,4 -1,25 0,27 1,25 1,4"
-                 fill="orange"/>
         <polyline transform='rotate(180.0)' points='0,25 0,29' stroke-width='1' stroke='white'/>
         <polyline transform='rotate(324.0)' points='0,25 0,29' stroke-width='1' stroke='white'/>
         <polyline transform='rotate(468.0)' points='0,25 0,29' stroke-width='1' stroke='white'/>
@@ -131,6 +128,9 @@
         <text dominant-baseline='middle' text-anchor='middle' x='-0.0' y='-20.0' class='tachoText'>20</text>
         <text dominant-baseline='middle' text-anchor='middle' x='19.0' y='-6.2' class='tachoText'>30</text>
         <text dominant-baseline='middle' text-anchor='middle' x='11.8' y='16.2' class='tachoText'>40</text>
+        <polygon id="hand"
+                 points="-1,4 -1,25 0,27 1,25 1,4"
+                 fill="orange"/>
       </g>
       <!-- FIXME Fix so no need to scale -->
       <g id="magneticCompass" transform='translate(0,-60) scale(0.333 0.333)'>

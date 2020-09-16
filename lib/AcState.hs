@@ -1,7 +1,10 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 module AcState where
 
+import Data.Binary
+import GHC.Generics (Generic)
 import Atmosphere
-import Handy
 import LiftDrag
 import NVector
 import Prop
@@ -37,6 +40,9 @@ data AcState =
     , acPitch :: Double -- ^ Aircraft pitch, radians
     , acThrottle :: Double -- ^ Throttle setting. FIXME I feel out of place.
     }
+  deriving (Generic)
+
+instance Binary AcState
 
 -- | Aircraft rate of change variables
 data AcRate =

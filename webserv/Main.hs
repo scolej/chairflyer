@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 
+import System.Directory
 import AcState
 import Control.Concurrent
 import Control.Concurrent.STM
@@ -13,6 +14,7 @@ import Integrators
 import Units
 import Vec
 import NVector
+import qualified Data.Binary as B
 import qualified Network.WebSockets as WS
 
 --
@@ -110,9 +112,16 @@ parseMessage _ = id
 port :: Int
 port = 8000
 
+saveFile :: String
+saveFile = "save.dat"
+
 main :: IO ()
 main = do
-  var <- newTVarIO startState
+  saveFileExists <- doesFileExist saveFile
+  s0 <- if saveFileExists
+        then B.decodeFile saveFile
+        else return startState
+  var <- newTVarIO s0
   _ <- forkIO $ simpleSim var
   putStrLn $ "Starting on port " ++ show port
   WS.runServer "127.0.0.1" port (app var)
@@ -136,6 +145,12 @@ app var pending = do
         WS.sendTextData conn $ encode resp
         threadDelaySec simTimeStep
   _ <- forkIO $ forever send
+  let save = do
+        ac <- readTVarIO var
+        B.encodeFile saveFile ac
+        putStrLn "saved"
+        threadDelaySec 20        
+  _ <- forkIO $ forever save
   let receive = do
         txt <- unpack <$> WS.receiveData conn
         putStrLn $ "Received " ++ txt

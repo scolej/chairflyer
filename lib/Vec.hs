@@ -1,12 +1,21 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 module Vec where
+
+import Data.Binary
+import GHC.Generics (Generic)
 
 data Vec2 =
   Vec2 Double Double
-  deriving (Eq, Show)
+  deriving (Eq, Show, Generic)
+
+instance Binary Vec2
 
 data Vec3 =
   Vec3 Double Double Double
-  deriving (Eq, Show)
+  deriving (Eq, Show, Generic)
+
+instance Binary Vec3
 
 zerov2 :: Vec2
 zerov2 = Vec2 0 0

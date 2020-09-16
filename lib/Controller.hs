@@ -13,7 +13,7 @@ pidController
   -> Controller s
 pidController (kp, ki, kd) f g target = go pidZero
   where
-    go c0 = Controller $
+    go c0 = Controller
       (\dt s0 ->
          let t0 = pidTime c0
              errs0 = pidErrSum c0
