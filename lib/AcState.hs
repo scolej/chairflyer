@@ -17,7 +17,7 @@ reStd
   :: Double -- ^ Velocity
   -> Double -- ^ Altitude, metres
   -> Double -- ^ Reynolds number
-reStd v z  = rho * v * d / mu
+reStd v _  = rho * v * d / mu
  where mu = 18.5e-6 -- FIXME double check
        rho = 1
        d = 1
@@ -100,12 +100,12 @@ acRate atmos props _ s =
     onGround = h < 0.1
     rho = (atmosDensity . atmos) h
     q = 0.5 * rho * v * v
-    lift = (q * cl * (acpLiftingArea props)) `scalev2` acUnitVelUp s
+    lift = (q * cl * acpLiftingArea props) `scalev2` acUnitVelUp s
     aoa = alpha s
     ar = 7.4
     (cl, cd) = liftDrag ar aoa
     groundDrag = if onGround then 20 else 0 -- TODO Could be better.
-    dragMag = (q * cd * (acpLiftingArea props)) + groundDrag
+    dragMag = (q * cd * acpLiftingArea props) + groundDrag
     drag = dragMag `scalev2` acUnitVelBack s -- TODO Could be better, ground drag is not in the same direction.
     rpm = acThrottle s * acpMaxPropRpm props
     thrust = propThrust (acpPropD props) rho (rpmToRps rpm) v
