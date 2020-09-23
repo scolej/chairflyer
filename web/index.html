@@ -15,7 +15,7 @@
          id="instruments"
          xmlns="http://www.w3.org/2000/svg">
       <style>
-        .asText, .asLabel, .tachoText, .compassText {
+        .asText, .asLabel, .tachoText, .compassText, .altNumbers {
             fill: white;
             font-family: "Arial Black", Gadget, sans-serif;
         }
@@ -30,6 +30,16 @@
         }
         .compassText {
             font-size: 15px;
+        }
+        .altNumbers {
+            font-size: 6px;
+        }
+
+        #altLabel {
+            font-size: 6px;
+        }
+        #subscale {
+            font-size: 4px;
         }
       </style>
       <g id="airspeed" transform='translate(-60,0)'>
@@ -79,22 +89,84 @@
       </g>
       <g id="altimeter">
         <circle r="30" fill="black"/>
-        <polygon id="hundreds"
-                 points="-1,4 -1,25 0,27 1,25 1,4"
-                 fill="white"/>
-        <polygon id="thousands"
-                 points="-2,4 -3,9 0,19 3,9 2,4"
-                 fill="white"/>
-        <polyline transform="rotate(0)" points="0,25 0,29" stroke-width="1" stroke="white"/>
-        <polyline transform="rotate(36)" points="0,25 0,29" stroke-width="1" stroke="white"/>
-        <polyline transform="rotate(72)" points="0,25 0,29" stroke-width="1" stroke="white"/>
-        <polyline transform="rotate(108)" points="0,25 0,29" stroke-width="1" stroke="white"/>
-        <polyline transform="rotate(144)" points="0,25 0,29" stroke-width="1" stroke="white"/>
-        <polyline transform="rotate(180)" points="0,25 0,29" stroke-width="1" stroke="white"/>
-        <polyline transform="rotate(216)" points="0,25 0,29" stroke-width="1" stroke="white"/>
-        <polyline transform="rotate(252)" points="0,25 0,29" stroke-width="1" stroke="white"/>
-        <polyline transform="rotate(288)" points="0,25 0,29" stroke-width="1" stroke="white"/>
-        <polyline transform="rotate(324)" points="0,25 0,29" stroke-width="1" stroke="white"/>
+        <polyline stroke="white" stroke-width="1" transform="rotate(0.0)" points="0,25 0,29"/>
+        <polyline stroke="white" stroke-width="1" transform="rotate(36.0)" points="0,25 0,29"/>
+        <polyline stroke="white" stroke-width="1" transform="rotate(72.0)" points="0,25 0,29"/>
+        <polyline stroke="white" stroke-width="1" transform="rotate(108.0)" points="0,25 0,29"/>
+        <polyline stroke="white" stroke-width="1" transform="rotate(144.0)" points="0,25 0,29"/>
+        <polyline stroke="white" stroke-width="1" transform="rotate(180.0)" points="0,25 0,29"/>
+        <polyline stroke="white" stroke-width="1" transform="rotate(216.0)" points="0,25 0,29"/>
+        <polyline stroke="white" stroke-width="1" transform="rotate(252.0)" points="0,25 0,29"/>
+        <polyline stroke="white" stroke-width="1" transform="rotate(288.0)" points="0,25 0,29"/>
+        <polyline stroke="white" stroke-width="1" transform="rotate(324.0)" points="0,25 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(0.0)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(7.2)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(14.4)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(21.6)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(28.8)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(36.0)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(43.2)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(50.4)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(57.6)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(64.8)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(72.0)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(79.2)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(86.4)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(93.6)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(100.8)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(108.0)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(115.2)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(122.4)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(129.6)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(136.8)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(144.0)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(151.2)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(158.4)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(165.6)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(172.8)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(180.0)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(187.2)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(194.4)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(201.6)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(208.8)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(216.0)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(223.2)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(230.4)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(237.6)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(244.8)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(252.0)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(259.2)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(266.4)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(273.6)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(280.8)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(288.0)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(295.2)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(302.4)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(309.6)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(316.8)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(324.0)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(331.2)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(338.4)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(345.6)" points="0,27 0,29"/>
+        <polyline stroke="white" stroke-width="0.7" transform="rotate(352.8)" points="0,27 0,29"/>
+        <text class="altNumbers" text-anchor="middle" dominant-baseline="middle" x="1.7958636867904637e-9" y="-20.0">0</text>
+        <text class="altNumbers" text-anchor="middle" dominant-baseline="middle" x="11.755705047011771" y="-16.180339886654483">1</text>
+        <text class="altNumbers" text-anchor="middle" dominant-baseline="middle" x="19.021130326236044" y="-6.180339886474164">2</text>
+        <text class="altNumbers" text-anchor="middle" dominant-baseline="middle" x="19.021130325681092" y="6.180339888182132">3</text>
+        <text class="altNumbers" text-anchor="middle" dominant-baseline="middle" x="11.75570504555888" y="16.18033988771007">4</text>
+        <text class="altNumbers" text-anchor="middle" dominant-baseline="middle" x="0.0" y="20.0">5</text>
+        <text class="altNumbers" text-anchor="middle" dominant-baseline="middle" x="-11.75570504555888" y="16.18033988771007">6</text>
+        <text class="altNumbers" text-anchor="middle" dominant-baseline="middle" x="-19.021130325681085" y="6.180339888182149">7</text>
+        <text class="altNumbers" text-anchor="middle" dominant-baseline="middle" x="-19.021130326236037" y="-6.180339886474181">8</text>
+        <text class="altNumbers" text-anchor="middle" dominant-baseline="middle" x="-11.755705047011764" y="-16.180339886654487">9</text>
+        <text text-anchor="middle" id="altLabel" class="asText" x="-5" y="-5">ALT</text>
+        <g transform="translate(13.0,-2.0)">
+          <rect width="12" height="5" fill="#333" stroke="white" stroke-width="0.5"/>
+          <text id="subscale" class="asText" dominant-baseline="middle" y="3.5">1013</text>
+        </g>
+        <polygon id="thousands" fill="white" points="-1.5,0 -2,8 0,15 2,8 1.5,0"/>
+        <polygon id="hundreds" transform="rotate(30)" fill="white" points="-1,0 -1,23 0,25 1,23 1,0"/>
+        <circle r="3" fill="#333"/>
       </g>
       <g id="tacho" transform='translate(60,0)'>
         <circle r="30" fill="black"/>

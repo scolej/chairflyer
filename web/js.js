@@ -1,19 +1,21 @@
-var icon = new ol.Feature({
+var iconFeature = new ol.Feature({
     geometry: new ol.geom.Point(ol.proj.fromLonLat([145.365335, -37.698329])),
 });
 
+var icon = new ol.style.Icon({
+    anchor: [0.5, 0.1],
+    anchorXUnits: 'fraction',
+    anchorYUnits: 'fraction',
+    src: './plane.png'
+})
+
 var iconStyle = new ol.style.Style({
-    image: new ol.style.Icon({
-        anchor: [0.5, 0.1],
-        anchorXUnits: 'fraction',
-        anchorYUnits: 'fraction',
-        src: './plane.png'
-    })
+    image: icon
 });
-icon.setStyle(iconStyle);
+iconFeature.setStyle(iconStyle);
 
 var vectorSource = new ol.source.Vector({
-  features: [icon]
+  features: [iconFeature]
 });
 
 var vectorLayer = new ol.layer.Vector({
@@ -94,6 +96,7 @@ function hideInstruments() {
 }
 
 var i = 0;
+var mapRot = 0;
 window.addEventListener("load", function() {
 
     setAirspeed(0);
@@ -102,8 +105,6 @@ window.addEventListener("load", function() {
     // FIXME don't hardcode server location
     var s = new WebSocket("ws://127.0.0.1:8000", "protocolOne");
     s.onmessage = function (event) {
-        i += 1;
-
         var j = JSON.parse(event.data);
 
         setAltitude(j.rAltitude);
@@ -115,14 +116,20 @@ window.addEventListener("load", function() {
 
         var z = 15 - 3 / 10000 * j.rAltitude;
 
-        map.setView(new ol.View({
-            center: pos,
-            rotation: -j.rHeadingRad,
-            zoom: z,
-        }));
-        icon.setGeometry(new ol.geom.Point(pos));
+        if (i % 10 == 0) {
+            mapRot = j.rHeadingRad;
+            map.setView(new ol.View({
+                center: pos,
+                rotation: -mapRot,
+                zoom: z,
+            }));
+        }
+        iconFeature.setGeometry(new ol.geom.Point(pos));
+        icon.setRotation(j.rHeadingRad - mapRot)
 
         // FIXME should allow tapping on map for pitch & heading
+
+        i += 1;
     }
 
     document.addEventListener("keydown", function(event) {
@@ -134,9 +141,11 @@ window.addEventListener("load", function() {
         }
         if (event.key === "ArrowLeft") {
             s.send("l1");
+            i = 0;
         }
         if (event.key === "ArrowRight") {
             s.send("r1");
+            i = 0;
         }
         if (event.key === "ArrowUp") {
             s.send("pd1");
