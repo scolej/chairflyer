@@ -1,6 +1,7 @@
 module NVectorTest (tests) where
 
 import Happy
+import Vec
 import Handy
 import NVector
 
@@ -8,6 +9,7 @@ tests :: [Test]
 tests =
   concat [ backAndForth
          , destinations
+         , destinationVs
          , angleWrapping
          , initialHeadingTests
          ]
@@ -42,12 +44,23 @@ destinations =
          assertLL
             (45, 180)
             (nvecToLLDeg $ destination p2 (degToRad 0) (earthCirc / 4))
-     -- FIXME copy paste results, need some good cases
+     -- TODO copy paste results, need some good cases
      , "nominal destination" @@@
          assertLL
             (53.1884335712, 0.131199053)
             (nvecToLLDeg $ destination p1 h dist)
      ]
+
+destinationVs :: [Test]
+destinationVs =
+  [ "north from equator" @@@
+    let tol = 1e-6
+        d = 1000
+        e = let t = d / earthRadius
+            in Vec3 0 (sin t) (cos t)
+        a = destinationV (Vec3 0 1 0) (Vec3 1 0 0) d
+    in assertV3 tol e a
+  ]
 
 angleWrapping :: [Test]
 angleWrapping =

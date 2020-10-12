@@ -134,6 +134,8 @@ app var pending = do
         ac <- readTVarIO var
         let z = acAltitude ac
             v = acVel ac
+            -- FIXME the heading reported here is also wrong!
+            -- this is the initial heading, but we want final heading
             (p0, h, d) = acTrack ac
             ll = nvecToLLDeg $ destination p0 h d
             resp = Response { rAltitude = mToFt z
@@ -149,7 +151,7 @@ app var pending = do
         ac <- readTVarIO var
         B.encodeFile saveFile ac
         putStrLn "saved"
-        threadDelaySec 20        
+        threadDelaySec 20
   _ <- forkIO $ forever save
   let receive = do
         txt <- unpack <$> WS.receiveData conn

@@ -28,6 +28,40 @@ reStd v _  = rho * v * d / mu
 --
 --
 
+-- FIXME
+--
+-- Need to pick a better representation of position & heading to make
+-- it easier to implement wind.
+--     position, heading
+-- how much error will it introduce, every step updating position and
+-- then updating heading with final heading; it feels nasty
+--
+-- could just move to full 3D coords?
+-- but this will suffer from the same sort of thing... ?
+-- at discrete intervals, have to recompute the reference frame.
+--
+-- another option: state holds true heading but we evolve along
+-- a loxodrome? No! this would make it very hard to fly over a pole.
+--
+-- every step, convert to a local cartesian space, update with
+-- velocity, adding wind components, then go back to nvector + heading?
+--
+-- but is it any different to just applying a "wind translation" at
+-- each step? the wind translation should also affect the heading! but
+-- how?
+--
+-- what about a '2D local space' where one axis is aligned with the
+-- great-circle-course which doesn't account for wind? it still
+-- doesn't really work though, imagine flying up a meridian to the
+-- north pole, with a wind from the east; you should fly diagonally
+-- past the pole, missing it.
+--
+-- even if you do local 2D with East +x and North +y, you still need
+-- to recompute the frame all the time. and as you fly over the pole
+-- weird stuff happens.
+--
+-- maybe full 3D really is the best.
+
 -- | Aircraft state variables
 data AcState =
   AcState

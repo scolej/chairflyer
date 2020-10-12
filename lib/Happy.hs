@@ -1,6 +1,7 @@
 module Happy where
 
 import NVector
+import Vec
 import Data.List
 import Data.Maybe
 import System.Exit
@@ -44,6 +45,9 @@ spreadPrint (a:b:xs)
   | otherwise = a : "\n\n" : spreadPrint (b:xs)
 spreadPrint (a:[]) = [a]
 
+-- TODO
+-- need to output some newlines lines don't get too long and Emacs doesn't break
+
 runTests :: [Test] -> IO ()
 runTests ts = do
   let failed = any (isJust . testResult) ts
@@ -73,6 +77,31 @@ eqLL :: LatLon -> LatLon -> Bool
 eqLL (alat, alon) (blat, blon) =
   eqDoub 1e-5 alat blat &&
   eqDoub 1e-5 alon blon
+
+-- TODO
+-- 'format table' would be really handy
+-- give a [[String]] and get a table with lined up columns
+
+assertV3 :: Double -> Vec3 -> Vec3 -> Maybe [String]
+assertV3 tol (Vec3 ex ey ez) (Vec3 ax ay az) =
+  let f n e a = let eq = d < tol
+                    d = abs (e - a)
+                in ( eq
+                   , unwords
+                     [ if eq then " " else "!"
+                     , n
+                     , printf "%10.4e" e
+                     , printf "%10.4e" a
+                     , if eq then "" else printf "%10.4e" d
+                     ]
+                   )
+      cs = [ f "x" ex ax
+           , f "y" ey ay
+           , f "z" ez az
+           ]
+  in if any (not . fst) cs
+     then Just $ map snd cs
+     else Nothing
 
 -- | Describe a mismatch of expected and actual values.
 mismatch :: String -> String -> [String]
