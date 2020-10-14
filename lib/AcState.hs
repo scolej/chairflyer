@@ -2,9 +2,9 @@
 
 module AcState where
 
+import Atmosphere
 import Data.Binary
 import GHC.Generics (Generic)
-import Atmosphere
 import LiftDrag
 import NVector
 import Prop
@@ -34,7 +34,7 @@ data AcState =
     { acTime       :: Double -- ^ Absolute time
     , acAltitude   :: Double -- ^ Height above sea level, metres
     , acPos        :: NVec   -- ^ Position
-    , acHeadingV   :: NVec   -- ^ Heading vector
+    , acHeadingV   :: Vec3   -- ^ Heading vector
     , acHeading    :: Double -- ^ Aircraft heading, radians
     , acVel        :: Vec2   -- ^ 2D velocity, longitudinal & vertical
     , acMass       :: Double -- ^ Mass of aircraft
@@ -140,7 +140,7 @@ acStep dt r s =
     -- FIXME need to take into account altitude: rescale vx to surface speed
     , acPos = p1
     , acHeadingV = hv1
-    , acHeading = heading hv1 p1
+    , acHeading = heading p1 hv1
     , acVel = acVel s `addv2` (dt `scalev2` acrAcc r )
     , acMass = acMass s + acrMass r
     }

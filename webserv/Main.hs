@@ -1,20 +1,19 @@
 {-# LANGUAGE DeriveGeneric #-}
 
-import Debug.Trace
-import System.Directory
 import AcState
 import Control.Concurrent
 import Control.Concurrent.STM
 import Control.Monad
 import Data.Aeson
-import Data.Text
 import Data.Fixed
+import Data.Text
 import GHC.Generics
 import Handy
 import Integrators
+import NVector
+import System.Directory
 import Units
 import Vec
-import NVector
 import qualified Data.Binary as B
 import qualified Network.WebSockets as WS
 
@@ -53,9 +52,9 @@ simpleSim :: TVar AcState -> IO ()
 simpleSim var = forever go
   where f s = iterate simStep s !! 1
         go = do
-          s <- readTVarIO var
-          print $ radToDeg $ acHeading s
-          --
+          -- FIXME
+          -- s <- readTVarIO var
+          -- print . acAltitude $ s
           atomically $ modifyTVar var f
           threadDelaySec simTimeStep
 
@@ -95,9 +94,14 @@ adjustPitch deg s0 = s0 { acPitch = p }
         p = degToRad deg + p0
 
 adjustThrottle :: Double -> AcState -> AcState
-adjustThrottle delta s0 = s0 { acThrottle = t }
+adjustThrottle delta s0 =
+  s0 { acThrottle = t }
   where t0 = acThrottle s0
         t = max 0 $ min 1 $ t0 + delta / 100
+
+-- FIXME
+-- on take off, you can pitch up so far that you never take off
+-- maybe too real & silly for this
 
 parseMessage :: String -> AcState -> AcState
 parseMessage ['t','h','+'] = adjustThrottle 2

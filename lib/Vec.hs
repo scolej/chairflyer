@@ -130,6 +130,12 @@ radTwixtv2 a b
     ma = magv2 a
     mb = magv2 b
 
+-- | Keep input in the range [-1, 1].
+clip1 :: Double -> Double
+clip1 x | x < -1.0 = -1.0
+        | x > 1.0 = 1.0
+        | otherwise = x
+
 -- | Find the signed angle between two vectors 'a' and 'b', looking along 'n'.
 -- Positive angles are anti-clockwise.
 -- FIXME There must be a simpler way to write this.
@@ -139,7 +145,7 @@ radTwixtv3 n a b
   | otherwise =
     let ua = unitv3 a
         ub = unitv3 b
-        m = acos $ ua `dotv3` ub
+        m = acos $ clip1 $ ua `dotv3` ub
         s = if crossv3 ua ub `dotv3` n <= 0 then 1 else (-1)
     in m * s
 

@@ -141,11 +141,11 @@ window.addEventListener("load", function() {
         }
         if (event.key === "ArrowLeft") {
             s.send("l1");
-            i = 0;
+            i = 1;
         }
         if (event.key === "ArrowRight") {
             s.send("r1");
-            i = 0;
+            i = 1;
         }
         if (event.key === "ArrowUp") {
             s.send("pd1");
