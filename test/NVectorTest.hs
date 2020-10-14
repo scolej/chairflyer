@@ -10,6 +10,8 @@ tests =
   concat [ backAndForth
          , destinations
          , destinationVs
+         , headingTests
+         , headingIsos
          , angleWrapping
          , initialHeadingTests
          ]
@@ -53,14 +55,54 @@ destinations =
 
 destinationVs :: [Test]
 destinationVs =
-  [ "north from equator" @@@
-    let tol = 1e-6
-        d = 1000
-        e = let t = d / earthRadius
-            in Vec3 0 (sin t) (cos t)
-        a = destinationV (Vec3 0 1 0) (Vec3 1 0 0) d
-    in assertV3 tol e a
-  ]
+  let tol = 1e-6
+      dist = 1000
+      t = dist / earthRadius
+      test h d p e =
+        let a = destinationV h d p
+        in assertV3 tol e a
+  in [ "north from equator" @@@
+       let e = Vec3 (sin t) (cos t) 0
+       in test (Vec3 1 0 0) dist (Vec3 0 1 0) e
+     , "south from equator" @@@
+       let e = Vec3 (-(sin t)) (cos t) 0
+       in test (Vec3 (-1) 0 0) dist (Vec3 0 1 0) e
+     , "east along equator" @@@
+       let e = Vec3 0 (cos t) (sin t)
+       in test (Vec3 0 0 1) dist (Vec3 0 1 0) e
+     , "west along equator" @@@
+       let e = Vec3 0 (cos t) (-(sin t))
+       in test (Vec3 0 0 (-1)) dist (Vec3 0 1 0) e
+     ]
+
+headingTests :: [Test]
+headingTests =
+  let tol = 1e-3
+      test e p h = assertDouble tol e (radToDeg $ heading p h)
+  in [ "north" @@@ test   0 (Vec3 0 1 0) (Vec3   1   0   0 )
+     , "south" @@@ test 180 (Vec3 0 1 0) (Vec3 (-1)  0   0 )
+     , "east"  @@@ test  90 (Vec3 0 1 0) (Vec3   0   0   1 )
+     , "west"  @@@ test 270 (Vec3 0 1 0) (Vec3   0   0 (-1))
+     --
+     , "north east" @@@ test  45 (Vec3 0 1 0) (unitv3 (Vec3 1 0   1 ))
+     , "north west" @@@ test 315 (Vec3 0 1 0) (unitv3 (Vec3 1 0 (-1)))
+     --
+     , "north 2" @@@ test   0 (Vec3 0 (-1) 0) (Vec3   1   0   0 )
+     , "south 2" @@@ test 180 (Vec3 0 (-1) 0) (Vec3 (-1)  0   0 )
+     , "east 2"  @@@ test  90 (Vec3 0 (-1) 0) (Vec3   0   0 (-1))
+     , "west 2"  @@@ test 270 (Vec3 0 (-1) 0) (Vec3   0   0   1 )
+     ]
+
+headingIsos :: [Test]
+headingIsos =
+  let p = llDegToNVec (-37.698329, 145.365335)
+      test deg =
+        assertDouble 1e-6 deg (radToDeg . heading p . headingVector p . degToRad $ deg)
+  in [ "heading iso 1" @@@ test 0
+     , "heading iso 2" @@@ test 90
+     , "heading iso 3" @@@ test 180
+     , "heading iso 4" @@@ test 270
+     ]
 
 angleWrapping :: [Test]
 angleWrapping =
@@ -73,8 +115,9 @@ angleWrapping =
 
 initialHeadingTests :: [Test]
 initialHeadingTests =
-  let ini a b e = assertDouble 1e-3 e $
-                       radToDeg (initialHeading (llDegToNVec a) (llDegToNVec b))
+  let ini a b e =
+        assertDouble 1e-3 e $
+        radToDeg (initialHeading (llDegToNVec a) (llDegToNVec b))
   in prefixTests "initial heading"
      [ "to the north pole" @@@ ini (0, 0) (90, 0) 0
      , "to the south pole" @@@ ini (0, 0) (-90, 0) 180

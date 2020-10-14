@@ -130,7 +130,7 @@ radTwixtv2 a b
     ma = magv2 a
     mb = magv2 b
 
--- | Find the signed angle between two vectors 'a' and 'n', looking along 'n'.
+-- | Find the signed angle between two vectors 'a' and 'b', looking along 'n'.
 -- Positive angles are anti-clockwise.
 -- FIXME There must be a simpler way to write this.
 radTwixtv3 :: Vec3 -> Vec3 -> Vec3 -> Double
@@ -142,3 +142,28 @@ radTwixtv3 n a b
         m = acos $ ua `dotv3` ub
         s = if crossv3 ua ub `dotv3` n <= 0 then 1 else (-1)
     in m * s
+
+-- | Rotation of a vector by an angle around an axis.
+rotV
+  :: Vec3   -- ^ Axis
+  -> Double -- ^ Angle (radians)
+  -> Vec3   -- ^ Vector to rotate
+  -> Vec3   -- ^ Result
+rotV (Vec3 ux uy uz) t (Vec3 vx vy vz) =
+  let c = cos t
+      s = sin t
+      --
+      r11 = c + ux * ux * (1 - c)
+      r12 = ux * uy * (1 - c) - uz * s
+      r13 = ux * uz * (1 - c) + uy * s
+      --
+      r21 = uy * ux * (1 - c) + uz * s
+      r22 = c +  uy * uy * (1 - c)
+      r23 = uy * uz * (1 - c) - ux * s
+      --
+      r31 = uz * ux * (1 - c) - uy * s
+      r32 = uz * uy * (1 - c) + ux * s
+      r33 = c + uz * uz * (1 - c)
+  in Vec3 (r11 * vx + r12 * vy + r13 * vz)
+          (r21 * vx + r22 * vy + r23 * vz)
+          (r31 * vx + r32 * vy + r33 * vz)

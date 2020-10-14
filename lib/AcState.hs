@@ -28,51 +28,18 @@ reStd v _  = rho * v * d / mu
 --
 --
 
--- FIXME
---
--- Need to pick a better representation of position & heading to make
--- it easier to implement wind.
---     position, heading
--- how much error will it introduce, every step updating position and
--- then updating heading with final heading; it feels nasty
---
--- could just move to full 3D coords?
--- but this will suffer from the same sort of thing... ?
--- at discrete intervals, have to recompute the reference frame.
---
--- another option: state holds true heading but we evolve along
--- a loxodrome? No! this would make it very hard to fly over a pole.
---
--- every step, convert to a local cartesian space, update with
--- velocity, adding wind components, then go back to nvector + heading?
---
--- but is it any different to just applying a "wind translation" at
--- each step? the wind translation should also affect the heading! but
--- how?
---
--- what about a '2D local space' where one axis is aligned with the
--- great-circle-course which doesn't account for wind? it still
--- doesn't really work though, imagine flying up a meridian to the
--- north pole, with a wind from the east; you should fly diagonally
--- past the pole, missing it.
---
--- even if you do local 2D with East +x and North +y, you still need
--- to recompute the frame all the time. and as you fly over the pole
--- weird stuff happens.
---
--- maybe full 3D really is the best.
-
 -- | Aircraft state variables
 data AcState =
   AcState
-    { acTime :: Double -- ^ Absolute time
-    , acAltitude :: Double -- ^ Height above sea level, metres
-    , acTrack :: (NVec, Double, Double) -- ^ Position, heading, distance travelled
-    , acVel :: Vec2 -- ^ 2D velocity, longitudinal & vertical
-    , acMass :: Double -- ^ Mass of aircraft
-    , acHeading :: Double -- ^ Aircraft heading, radians
-    , acPitch :: Double -- ^ Aircraft pitch, radians
-    , acThrottle :: Double -- ^ Throttle setting. FIXME I feel out of place.
+    { acTime       :: Double -- ^ Absolute time
+    , acAltitude   :: Double -- ^ Height above sea level, metres
+    , acPos        :: NVec   -- ^ Position
+    , acHeadingV   :: NVec   -- ^ Heading vector
+    , acHeading    :: Double -- ^ Aircraft heading, radians
+    , acVel        :: Vec2   -- ^ 2D velocity, longitudinal & vertical
+    , acMass       :: Double -- ^ Mass of aircraft
+    , acPitch      :: Double -- ^ Aircraft pitch, radians
+    , acThrottle   :: Double -- ^ Throttle setting. FIXME I feel out of place.
     }
   deriving (Generic)
 
@@ -171,13 +138,18 @@ acStep dt r s =
   s { acTime = acTime s + dt
     , acAltitude = acAltitude s + dt * vz
     -- FIXME need to take into account altitude: rescale vx to surface speed
-    , acTrack = (p0, h, d0 + vx * dt)
+    , acPos = p1
+    , acHeadingV = hv1
+    , acHeading = heading hv1 p1
     , acVel = acVel s `addv2` (dt `scalev2` acrAcc r )
     , acMass = acMass s + acrMass r
     }
   where
     Vec2 vx vz = acrVel r
-    (p0, h, d0) = acTrack s
+    p0 = acPos s
+    hv0 = acHeadingV s
+    p1 = unitv3 $ destinationV hv0 (dt * vx) p0
+    hv1 = unitv3 $ crossv3 (crossv3 p1 hv0) p1 -- heading vector is always orthogonal to position vector
 
 hackyJab :: AcProps
 hackyJab =

@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 
+import Debug.Trace
 import System.Directory
 import AcState
 import Control.Concurrent
@@ -33,27 +34,33 @@ simStep = acClip . rk4step jabRate acStep simTimeStep
 
 startState :: AcState
 startState =
-  AcState { acTime = 0
-          , acAltitude = 0
-          , acTrack = (llDegToNVec (-37.698329, 145.365335), degToRad 8, 0)
-          , acVel = Vec2 0 0
-          , acMass = acpMass hackyJab
-          , acHeading = 0
-          , acPitch = degToRad 10
-          -- Massive FIXME - if I make this 0 everything goes haywire
-          -- div by 0 somewhere?
-          , acThrottle = 0.1
-          }
+  let h = degToRad 8
+      p = llDegToNVec (-37.698329, 145.365335)
+  in AcState { acTime = 0
+             , acAltitude = 0
+             , acPos = p
+             , acHeadingV = headingVector p h
+             , acHeading = h
+             , acVel = Vec2 0 0
+             , acMass = acpMass hackyJab
+             , acPitch = degToRad 10
+             -- Massive FIXME - if I make this 0 everything goes haywire
+             -- div by 0 somewhere?
+             , acThrottle = 0.1
+             }
 
 simpleSim :: TVar AcState -> IO ()
 simpleSim var = forever go
   where f s = iterate simStep s !! 1
         go = do
+          s <- readTVarIO var
+          print $ radToDeg $ acHeading s
+          --
           atomically $ modifyTVar var f
           threadDelaySec simTimeStep
 
 --
--- Server stuff
+-- Server
 --
 
 data Response =
@@ -69,23 +76,18 @@ instance ToJSON Response where
 
 instance FromJSON Response
 
--- FIXME These heading changes are wrong. Need to use final heading to
--- get the adjusted heading at end of track.
-
-newHeading :: Double -> AcState -> AcState
-newHeading deg s0 = s0 { acTrack = (p, h, 0) }
-  where (p0, h0, d) = acTrack s0
-        p = destination p0 h0 d
-        h = degToRad deg
-
 wrapHeadingRad :: Double -> Double
 wrapHeadingRad r = mod' r (2 * pi)
 
 turn :: Double -> AcState -> AcState
-turn deg s0 = s0 { acTrack = (p, h, 0) }
-  where (p0, h0, d) = acTrack s0
-        p = destination p0 h0 d
-        h = wrapHeadingRad (degToRad deg + h0)
+turn deg s0 =
+  s0 { acHeadingV = hv1
+     , acHeading = heading p0 hv1
+     }
+  where p0 = acPos s0
+        hv0 = acHeadingV s0
+        delta = degToRad (-deg)
+        hv1 = rotV p0 delta hv0
 
 adjustPitch :: Double -> AcState -> AcState
 adjustPitch deg s0 = s0 { acPitch = p }
@@ -104,7 +106,6 @@ parseMessage ('p':'u':rest) = adjustPitch $ read rest
 parseMessage ('p':'d':rest) = adjustPitch $ (-1) * read rest
 parseMessage ('p':rest) = \a -> a { acPitch = degToRad $ read rest }
 parseMessage ('t':rest) = \a -> a { acThrottle = read rest / 100 }
-parseMessage ('h':rest) =  newHeading $ read rest
 parseMessage ('r':rest) =  turn $ read rest
 parseMessage ('l':rest) = turn $ (-1) * read rest
 parseMessage _ = id
@@ -133,11 +134,10 @@ app var pending = do
   let send = do
         ac <- readTVarIO var
         let z = acAltitude ac
+            -- TODO only use the forward component of velocity
             v = acVel ac
-            -- FIXME the heading reported here is also wrong!
-            -- this is the initial heading, but we want final heading
-            (p0, h, d) = acTrack ac
-            ll = nvecToLLDeg $ destination p0 h d
+            h = acHeading ac
+            ll = nvecToLLDeg . acPos $ ac
             resp = Response { rAltitude = mToFt z
                             , rAirspeed = mpsToKnots (magv2 v)
                             , rLatLon = ll

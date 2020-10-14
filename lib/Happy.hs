@@ -45,6 +45,24 @@ spreadPrint (a:b:xs)
   | otherwise = a : "\n\n" : spreadPrint (b:xs)
 spreadPrint (a:[]) = [a]
 
+padCols
+  :: [Int]      -- ^ Indices of columns to right align
+  -> [[String]] -- ^ Rows of columns
+  -> [[String]] -- ^ Rows of padded columns
+padCols ris rows =
+  let rowsp = map (\cs -> cs ++ repeat "") rows -- append blank columns
+      l = maximum $ map length rows             -- most columns in any row
+      g i xs = xs !! i                          -- FIXME
+      p :: Int -> String -> String              -- given a column index pad a string
+      p i s =
+        let w = maximum $
+                map length (map (g i) rowsp)    -- width of column
+            pad = take (w - length s) (repeat ' ')
+        in if i `elem` ris
+           then pad ++ s
+           else s ++ pad
+  in map (zipWith ($) (map p [0..l])) rows
+
 -- TODO
 -- need to output some newlines lines don't get too long and Emacs doesn't break
 
@@ -78,29 +96,26 @@ eqLL (alat, alon) (blat, blon) =
   eqDoub 1e-5 alat blat &&
   eqDoub 1e-5 alon blon
 
--- TODO
--- 'format table' would be really handy
--- give a [[String]] and get a table with lined up columns
-
 assertV3 :: Double -> Vec3 -> Vec3 -> Maybe [String]
 assertV3 tol (Vec3 ex ey ez) (Vec3 ax ay az) =
-  let f n e a = let eq = d < tol
-                    d = abs (e - a)
-                in ( eq
-                   , unwords
-                     [ if eq then " " else "!"
-                     , n
-                     , printf "%10.4e" e
-                     , printf "%10.4e" a
-                     , if eq then "" else printf "%10.4e" d
-                     ]
-                   )
+  let f n e a =
+        let eq = d < tol
+            d = abs (e - a)
+        in ( eq
+           , [ if eq then "" else "!"
+             , n
+             , printf "%10.4e" e
+             , printf "%10.4e" a
+             , if eq then "" else printf "%10.4e" d
+             ]
+           )
       cs = [ f "x" ex ax
            , f "y" ey ay
            , f "z" ez az
            ]
+      hs = ["", "", "expected", "actual", "difference"]
   in if any (not . fst) cs
-     then Just $ map snd cs
+     then Just $ map (unwords) $ padCols [2, 3, 4] $ hs : (map snd cs)
      else Nothing
 
 -- | Describe a mismatch of expected and actual values.

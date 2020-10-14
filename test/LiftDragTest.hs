@@ -4,6 +4,7 @@ import Happy
 import Handy
 import LiftDrag
 
+ld :: Double -> (Double, Double)
 ld deg = liftDrag 7.4 (degToRad deg)
 
 sanity :: [Test]

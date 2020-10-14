@@ -64,16 +64,42 @@ destination s h dist = (cos t `scalev3` s) `addv3` (sin t `scalev3` d)
         n = s `crossv3` e
 
 destinationV
-  :: NVec   -- ^ Initial positions
-  -> Vec3   -- ^ Heading vector, unit length
+  :: Vec3   -- ^ Heading vector, unit length
   -> Double -- ^ Distance to travel, metres
+  -> NVec   -- ^ Initial position
   -> NVec   -- ^ Final position
-destinationV p v d =
-  v
+destinationV h d p = rotV a (-t) p
+  where a = unitv3 $ crossv3 h p
+        t = d / earthRadius
 
 --
 --
 --
+
+-- | Finds the angle from true north at a position when pointing along
+-- a heading vector.
+heading
+  :: NVec   -- ^ Position
+  -> Vec3   -- ^ Heading vector
+  -> Double -- ^ Angle from true north in radians
+heading p h =
+  let ln = localNorth p
+      rt = radTwixtv3 p ln h
+  in if rt < 0
+     then (2 * pi) + rt
+     else rt
+
+-- | Find the local north vector at a position, that is, the vector
+-- pointing north in the tangent plane at position.
+localNorth :: NVec -> Vec3
+localNorth p =
+  unitv3 $ crossv3 p (crossv3 northPole p)
+
+-- | Find the heading vector at a position corresponding to an angle
+-- from true north in radians.
+headingVector :: NVec -> Double -> Vec3
+headingVector p r =
+  rotV p (-r) (localNorth p)
 
 -- | Wrap an angle into the range 0 to 2 pi.
 wrapHeading :: Double -> Double

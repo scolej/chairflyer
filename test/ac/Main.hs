@@ -13,10 +13,11 @@ s0 =
   AcState { acTime = 0
           , acThrottle = 1
           , acAltitude = 0
-          , acTrack = (zerov3, 0, 0)
+          , acPos = zerov3
+          , acHeadingV = zerov3
+          , acHeading = 0
           , acVel = Vec2 0 0
           , acMass = acpMass hackyJab
-          , acHeading = 0
           , acPitch = 0
           }
 
