@@ -5,3 +5,6 @@ tmp/
 watch
 *.hi
 *.o
+filelist
+*.svg
+*.org

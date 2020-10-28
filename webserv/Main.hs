@@ -8,8 +8,9 @@ import Data.Aeson
 import Data.Fixed
 import Data.Text
 import GHC.Generics
+import Atmosphere
 import Handy
-import Integrators
+import Jabiru
 import NVector
 import System.Directory
 import Units
@@ -28,25 +29,36 @@ threadDelaySec s = threadDelay . round $ s * 1000000
 simTimeStep :: Double
 simTimeStep = 0.4
 
+ylil :: NVec
+ylil = llDegToNVec (-37.698329, 145.365335)
+
+atmos :: NVec -> Double -> Atmosphere
+atmos =
+  let e = localEast ylil
+      v = scalev3 10 e
+      w = const v
+  in isaWind w
+
 simStep :: AcState -> AcState
-simStep = acClip . rk4step jabRate acStep simTimeStep
+simStep = jabiru atmos simTimeStep
 
 startState :: AcState
 startState =
   let h = degToRad 8
-      p = llDegToNVec (-37.698329, 145.365335)
-  in AcState { acTime = 0
-             , acAltitude = 0
-             , acPos = p
-             , acHeadingV = headingVector p h
-             , acHeading = h
-             , acVel = Vec2 0 0
-             , acMass = acpMass hackyJab
-             , acPitch = degToRad 10
-             -- Massive FIXME - if I make this 0 everything goes haywire
-             -- div by 0 somewhere?
-             , acThrottle = 0.1
-             }
+      p = ylil
+  in AcState
+     { acTime = 0
+     , acAltitude = 0
+     , acPos = p
+     , acHeadingV = headingVector p h
+     , acHeading = h
+     , acVel = Vec2 0 0
+     , acMass = acpMass hackyJab
+     , acPitch = degToRad 10
+     -- Massive FIXME - if I make this 0 everything goes haywire
+     -- div by 0 somewhere?
+     , acThrottle = 0.1
+     }
 
 simpleSim :: TVar AcState -> IO ()
 simpleSim var = forever go

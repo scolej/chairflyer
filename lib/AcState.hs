@@ -31,16 +31,16 @@ reStd v _  = rho * v * d / mu
 -- | Aircraft state variables
 data AcState =
   AcState
-    { acTime       :: Double -- ^ Absolute time
-    , acAltitude   :: Double -- ^ Height above sea level, metres
-    , acPos        :: NVec   -- ^ Position
-    , acHeadingV   :: Vec3   -- ^ Heading vector
-    , acHeading    :: Double -- ^ Aircraft heading, radians
-    , acVel        :: Vec2   -- ^ 2D velocity, longitudinal & vertical
-    , acMass       :: Double -- ^ Mass of aircraft
-    , acPitch      :: Double -- ^ Aircraft pitch, radians
-    , acThrottle   :: Double -- ^ Throttle setting. FIXME I feel out of place.
-    }
+  { acTime       :: Double -- ^ Absolute time
+  , acAltitude   :: Double -- ^ Height above sea level, metres
+  , acPos        :: NVec   -- ^ Position
+  , acHeadingV   :: Vec3   -- ^ Heading vector
+  , acHeading    :: Double -- ^ Aircraft heading, radians
+  , acVel        :: Vec2   -- ^ 2D velocity, longitudinal & vertical
+  , acMass       :: Double -- ^ Mass of aircraft
+  , acPitch      :: Double -- ^ Aircraft pitch, radians
+  , acThrottle   :: Double -- ^ Throttle setting. FIXME I feel out of place.
+  }
   deriving (Generic)
 
 instance Binary AcState
@@ -48,19 +48,19 @@ instance Binary AcState
 -- | Aircraft rate of change variables
 data AcRate =
   AcRate
-    { acrVel :: Vec2 -- ^ 2D velocity, longitudinal & vertical
-    , acrAcc :: Vec2 -- ^ 2D acceleration, longitudinal & vertical
-    , acrMass :: Double -- ^ Rate of change of mass
-    }
+  { acrVel :: Vec2 -- ^ 2D velocity, longitudinal & vertical
+  , acrAcc :: Vec2 -- ^ 2D acceleration, longitudinal & vertical
+  , acrMass :: Double -- ^ Rate of change of mass
+  }
 
 -- | Aircraft properties.
 data AcProps =
   AcProps
-    { acpMass :: Double
-    , acpLiftingArea :: Double
-    , acpMaxPropRpm :: Double
-    , acpPropD :: Double
-    }
+  { acpMass :: Double
+  , acpLiftingArea :: Double
+  , acpMaxPropRpm :: Double
+  , acpPropD :: Double
+  }
   deriving (Show)
 
 -- | Compute a unit vector pointing forward along the aircraft's body
@@ -93,19 +93,27 @@ acUnitVelUp s = Vec2 (-y) x
   where Vec2 x y = acUnitVelForward s
 
 -- FIXME if we don't use dt, is there any advantage to using RK4?
-acRate :: (Double -> Atmosphere) -> AcProps -> Double -> AcState -> AcRate
+acRate
+  :: (NVec ->
+      Double ->
+      Atmosphere) -- ^ Atmospheric conditions
+  -> AcProps      -- ^ Aircraft properties
+  -> Double       -- ^ Delta time
+  -> AcState      -- ^ Start state
+  -> AcRate       -- ^ Rate of change
 acRate atmos props _ s =
   AcRate
-    { acrVel = acVel s
-    , acrAcc = (1 / acMass s) `scalev2` sumv2 [weight, lift, drag, thrustv]
-    , acrMass = 0
-    }
+  { acrVel = acVel s
+  , acrAcc = (1 / acMass s) `scalev2` sumv2 [weight, lift, drag, thrustv]
+  , acrMass = 0
+  }
   where
+    p = acPos s
     v = magv2 (acVel s)
     weight = Vec2 0 (-9.81 * acMass s)
     h = acAltitude s
     onGround = h < 0.1
-    rho = (atmosDensity . atmos) h
+    rho = atmosDensity $ atmos p h
     q = 0.5 * rho * v * v
     lift = (q * cl * acpLiftingArea props) `scalev2` acUnitVelUp s
     aoa = alpha s
@@ -133,10 +141,18 @@ acClip s = s { acAltitude = p
         p = if underground then 0 else z
         v = Vec2 vx (if underground then 0 else vz)
 
-acStep :: Double -> AcRate -> AcState -> AcState
-acStep dt r s =
+-- | Step aircraft state linearly over a time delta.
+acStep
+  :: (NVec ->
+      Double ->
+      Atmosphere) -- ^ Atmospheric conditions as a function of position
+  -> Double       -- ^ Delta time
+  -> AcRate       -- ^ Rate of change
+  -> AcState      -- ^ Start state
+  -> AcState      -- ^ End state
+acStep atmos dt r s =
   s { acTime = acTime s + dt
-    , acAltitude = acAltitude s + dt * vz
+    , acAltitude = z0 + dt * vz
     -- FIXME need to take into account altitude: rescale vx to surface speed
     , acPos = p1
     , acHeadingV = hv1
@@ -147,19 +163,11 @@ acStep dt r s =
   where
     Vec2 vx vz = acrVel r
     p0 = acPos s
-    hv0 = acHeadingV s
-    p1 = unitv3 $ destinationV hv0 (dt * vx) p0
+    z0 = acAltitude s
+    w = inPlaneAt p0 $ atmosWind $ atmos p0 z0
+    hv0 = unitv3 $ acHeadingV s -- current heading vector
+    vv = (vx `scalev3` hv0) `addv3` w -- velocity vector, including wind
+    vvx = magv3 vv -- magnitude of velocity vector
+    vvn = unitv3 vv  -- normalised velocity vector
+    p1 = unitv3 $ destinationV vvn (dt * vvx) p0
     hv1 = unitv3 $ crossv3 (crossv3 p1 hv0) p1 -- heading vector is always orthogonal to position vector
-
-hackyJab :: AcProps
-hackyJab =
-  AcProps
-    { acpMass = 540
-    , acpLiftingArea = 6.9
-    , acpMaxPropRpm = 3100
-    , acpPropD = 1.524
-    }
-
--- | Rate of change function for the hacky Jabiru in standard atmosphere.
-jabRate :: Double -> AcState -> AcRate
-jabRate = acRate isa hackyJab

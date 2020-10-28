@@ -28,8 +28,8 @@ prefixTests p ts = map f ts
 indent :: Int -> [String] -> [String]
 indent i = map ((++) (take i $ repeat ' '))
 
-go :: Test -> String
-go t =
+testResultStr :: Test -> String
+testResultStr t =
   let d = testDescription t
   in case (testResult t) of
       Nothing -> "☻"
@@ -39,12 +39,16 @@ go t =
 -- Lines with only one character go on the same line,
 -- otherwise we add a separator.
 spreadPrint :: [String] -> [String]
-spreadPrint [] = []
-spreadPrint (a:b:xs)
-  | length a == 1 && length b == 1 = a : spreadPrint (b:xs)
-  | otherwise = a : "\n\n" : spreadPrint (b:xs)
-spreadPrint (a:[]) = [a]
+spreadPrint ss = go (0 :: Int) ss
+  where
+    go _ [] = []
+    go _ (a:[]) = [a]
+    go i (a:b:xs)
+      | i > 100 = "\n" : go 0 (b:xs)
+      | length a == 1 && length b == 1 = a : go (i + 1) (b:xs)
+      | otherwise = a : "\n\n" : go (i + 1) (b:xs)
 
+-- | Pad columns to make a table.
 padCols
   :: [Int]      -- ^ Indices of columns to right align
   -> [[String]] -- ^ Rows of columns
@@ -69,7 +73,7 @@ padCols ris rows =
 runTests :: [Test] -> IO ()
 runTests ts = do
   let failed = any (isJust . testResult) ts
-      ls = spreadPrint $ map go ts ++ [if failed then "FAIL" else "PASS"]
+      ls = spreadPrint $ map testResultStr ts ++ [if failed then "FAIL" else "PASS"]
   mapM_ putStr ls
   putStrLn ""
   if failed

@@ -14,6 +14,7 @@ tests =
          , headingIsos
          , angleWrapping
          , initialHeadingTests
+         , inPlaneAtTests
          ]
 
 backAndForth :: [Test]
@@ -55,24 +56,25 @@ destinations =
 
 destinationVs :: [Test]
 destinationVs =
-  let tol = 1e-6
-      dist = 1000
-      t = dist / earthRadius
+  let tol          = 1e-6
+      dist         = 1000
+      t            = dist / earthRadius
       test h d p e =
         let a = destinationV h d p
         in assertV3 tol e a
-  in [ "north from equator" @@@
-       let e = Vec3 (sin t) (cos t) 0
-       in test (Vec3 1 0 0) dist (Vec3 0 1 0) e
+  in prefixTests "destination vector"
+     [ "north from equator" @@@
+       test (Vec3 1 0 0) dist (Vec3 0 1 0) (Vec3 (sin t) (cos t) 0)
      , "south from equator" @@@
-       let e = Vec3 (-(sin t)) (cos t) 0
-       in test (Vec3 (-1) 0 0) dist (Vec3 0 1 0) e
+       test (Vec3 (-1) 0 0) dist (Vec3 0 1 0) (Vec3 (-(sin t)) (cos t) 0)
      , "east along equator" @@@
-       let e = Vec3 0 (cos t) (sin t)
-       in test (Vec3 0 0 1) dist (Vec3 0 1 0) e
+       test (Vec3 0 0 1) dist (Vec3 0 1 0) (Vec3 0 (cos t) (sin t))
      , "west along equator" @@@
-       let e = Vec3 0 (cos t) (-(sin t))
-       in test (Vec3 0 0 (-1)) dist (Vec3 0 1 0) e
+       test (Vec3 0 0 (-1)) dist (Vec3 0 1 0) (Vec3 0 (cos t) (-(sin t)))
+     , "nonsense vector up" @@@
+       test (Vec3 1 0 0) dist (Vec3 1 0 0) (Vec3 1 0 0)
+     , "nonsense vector down" @@@
+       test (Vec3 (-1) 0 0) dist (Vec3 1 0 0) (Vec3 1 0 0)
      ]
 
 headingTests :: [Test]
@@ -125,4 +127,15 @@ initialHeadingTests =
      , "to the west" @@@ ini (0, 0) (0, (-1)) 270
      , "Lilydale 36" @@@ ini (-37.698329, 145.365335) (-37.686684, 145.367438) 8.133
      , "Lilydale 18" @@@ ini (-37.686684, 145.367438) (-37.698329, 145.365335) 188.132
+     ]
+
+inPlaneAtTests :: [Test]
+inPlaneAtTests =
+  let t e p v = assertV3 1e-6 e (inPlaneAt p v)
+  in prefixTests "in plane"
+     [ "ortho 1"  @@@ t (Vec3   0   1    1 ) (Vec3 1 0 0) (Vec3   1    1    1 )
+     , "ortho 2"  @@@ t (Vec3   0 (-1) (-1)) (Vec3 1 0 0) (Vec3 (-1) (-1) (-1))
+     , "ortho 3"  @@@ t (Vec3   1   0    1 ) (Vec3 0 1 0) (Vec3   1    1    1 )
+     , "ortho 4"  @@@ t (Vec3 (-1 ) 0  (-1)) (Vec3 0 1 0) (Vec3 (-1) (-1) (-1))
+     , "parallel" @@@ t (Vec3   0   0    0 ) (Vec3 1 0 0) (Vec3   1    0    0 )
      ]

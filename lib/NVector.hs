@@ -93,7 +93,13 @@ heading p h =
 -- pointing north in the tangent plane at position.
 localNorth :: NVec -> Vec3
 localNorth p =
-  unitv3 $ crossv3 p (crossv3 northPole p)
+  unitv3 $ crossv3 p $ localEast p
+
+-- | Find the local east vector at a position, that is, the vector
+-- pointing east in the tangent plane at position.
+localEast :: NVec -> Vec3
+localEast =
+  unitv3 . crossv3 northPole
 
 -- | Find the heading vector at a position corresponding to an angle
 -- from true north in radians.
@@ -110,3 +116,10 @@ initialHeading a b =
   let c = crossv3 a b
       d = crossv3 a northPole
   in wrapHeading $ radTwixtv3 a d c
+
+-- | Projects a 3D vector onto the tangent plane at a position. The
+-- result is still 3D, but has no component parallel to the position
+-- vector.
+inPlaneAt :: NVec -> Vec3 -> Vec3
+inPlaneAt pos v =
+  v `subv3` scalev3 (v `dotv3` pos) pos

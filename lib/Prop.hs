@@ -9,8 +9,8 @@ thrustCoeff
   -> Double -- ^ Propellor tip mach number
   -> Double -- ^ Advance ratio
   -> Double -- ^ Thrust coefficient
-thrustCoeff re mtip j = 0.12 * a * b * c
-  where a = 1 -- FIXMEEEE no Reynolds effect for the moment
+thrustCoeff _ mtip j = 0.12 * a * b * c
+  where a = 1 -- FIXME no Reynolds effect for the moment
         b = piecewiseLerp [(0, 1), (0.8, 0.8), (1, 0)] mtip
         c = cos . (*) (pi / 2) . clip 0 1 $ j
 

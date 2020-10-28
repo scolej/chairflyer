@@ -4,7 +4,7 @@ set output figFile
 set multiplot layout 4, 1
 set grid
 
-set xtics 300
+set xtics 10
 unset key
 
 set ylabel 'z (ft)'

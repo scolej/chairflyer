@@ -12,10 +12,10 @@ library
                  , SpringSystem
                  , SpringSystem2
                  , AcState
-                 , AcSystem
                  , Vec
                  , NVector
                  , Happy
+                 , Jabiru
                  , Atmosphere
                  , Output
                  , Units
@@ -42,6 +42,7 @@ executable test-ac
   main-is: ac/Main.hs
   build-depends: base
                , chairflyer
+               , process
 
 executable pidspring
   hs-source-dirs: test/pidspring

@@ -1,74 +1,32 @@
 import AcState
-import AcSystem
 import Atmosphere
-import Controller
 import Handy
-import Integrators
+import Jabiru
 import Output
 import Units
 import Vec
+import System.Process
 
 s0 :: AcState
 s0 =
-  AcState { acTime = 0
-          , acThrottle = 1
-          , acAltitude = 0
-          , acPos = zerov3
-          , acHeadingV = zerov3
-          , acHeading = 0
-          , acVel = Vec2 0 0
-          , acMass = acpMass hackyJab
-          , acPitch = 0
-          }
+  AcState
+  { acTime = 0
+  , acThrottle = 1
+  , acAltitude = 0
+  , acPos = zerov3
+  , acHeadingV = zerov3
+  , acHeading = 0
+  , acVel = Vec2 0 0
+  , acMass = 540
+  , acPitch = degToRad 8
+  }
 
-takeMinutes :: Double -> [AcSystem] -> [AcSystem]
-takeMinutes mins = takeWhile (\s -> (acTime . sysState) s < mins * 60)
+takeMinutes :: Double -> [AcState] -> [AcState]
+takeMinutes mins = takeWhile (\s -> acTime s < mins * 60)
 
---
--- No controllers.
--- Just climb, cut throttle and descend.
---
-
-histClimbCutThrottle :: [AcState]
-histClimbCutThrottle =
-  map sysState $ takeMinutes 10 $ iterate (u . stepAcSystem 0.3) sys0
-  where sys0 =
-          AcSystem { sysState = s0
-                   , sysController = idController
-                   }
-        u :: AcSystem -> AcSystem
-        u = updateState (\a -> if acTime a < 300
-                               then a { acPitch = degToRad 10
-                                      , acThrottle = 1
-                                      }
-                               else a { acPitch = 0
-                                      , acThrottle = 0
-                                      })
-
---
--- Try out the crappy speed controller.
--- Initial speed & then a change.
---
-
-speedChanger :: Controller AcState
-speedChanger = Controller $
-  \dt s0 -> let Controller c =
-                    if acTime s0 < 600
-                    then airspeedController (knotsToMps 65)
-                    else airspeedController (knotsToMps 80)
-                -- FIXME Under this arrangement we get lucky because 'airspeedController'
-                -- doesn't carry any state. How to compose controllers like this _and_
-                -- pipe their own state along?
-                (s, _) = c dt s0
-            in (s, speedChanger)
-
-histSpeedChanger :: [AcState]
-histSpeedChanger =
-  map sysState $ takeMinutes 30 $ iterate (stepAcSystem 0.3) sys0
-  where sys0 =
-          AcSystem { sysState = s0
-                   , sysController = speedChanger
-                   }
+simple :: [AcState]
+simple =
+  takeMinutes 2 $ iterate (jabiru (isaWind (const zerov3)) 0.3) s0
 
 --
 --
@@ -85,5 +43,5 @@ showState s =
 
 main :: IO ()
 main = do
-  writeData "speedChanger.dat" (map showState histSpeedChanger)
-  writeData "cutThrottle.dat" (map showState histClimbCutThrottle)
+  writeData "simple.dat" (map showState simple)
+  callCommand "gnuplot -e \"figFile='simple.png'\" -e \"datFile='simple.dat'\" plot.plt"
