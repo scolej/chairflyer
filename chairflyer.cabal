@@ -1,5 +1,5 @@
 name:          chairflyer
-version:       0.1.0.0
+version:       0.2
 build-type:    Simple
 cabal-version: >=1.10
 
@@ -8,21 +8,14 @@ library
                , binary
   ghc-options: -Wall
   hs-source-dirs: lib
-  exposed-modules: Integrators
-                 , SpringSystem
-                 , SpringSystem2
-                 , AcState
+  exposed-modules: SimState
                  , Vec
                  , NVector
                  , Happy
-                 , Jabiru
                  , Atmosphere
                  , Output
                  , Units
                  , Handy
-                 , LiftDrag
-                 , Prop
-                 , Controller
   default-language: Haskell2010
 
 test-suite tests
@@ -33,22 +26,8 @@ test-suite tests
   build-depends: base
                , chairflyer
   default-language: Haskell2010
-  other-modules: LiftDragTest
-               , NVectorTest
+  other-modules: NVectorTest
                , VecTest
-
-executable test-ac
-  hs-source-dirs: test
-  main-is: ac/Main.hs
-  build-depends: base
-               , chairflyer
-               , process
-
-executable pidspring
-  hs-source-dirs: test/pidspring
-  main-is: Main.hs
-  build-depends: base
-               , chairflyer
 
 executable webserv
   hs-source-dirs: webserv
