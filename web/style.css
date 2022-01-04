@@ -4,11 +4,10 @@ body {
 
 #instruments {
     margin: auto;
-    max-height: 30em;
+    max-height: 23em;
     /*display: none;*/
     position: absolute;
     bottom: 0px;
     left: 0;
     right: 0;
 }
-

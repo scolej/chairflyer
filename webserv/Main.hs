@@ -35,7 +35,7 @@ ylil = llDegToNVec (-37.698329, 145.365335)
 atmos :: NVec -> Double -> Atmosphere
 atmos =
   let e = localEast ylil
-      v = scalev3 10 e
+      v = scalev3 5 e
       w = const v
   in isaWind w
 
@@ -79,6 +79,7 @@ data Response =
            , rAirspeed :: Double
            , rLatLon :: LatLon
            , rHeadingRad :: Double
+           , rHeadingMagRad :: Double
            , rRpm :: Double
            } deriving (Generic, Show)
 
@@ -158,6 +159,7 @@ app var pending = do
                             , rAirspeed = mpsToKnots (magv2 v)
                             , rLatLon = ll
                             , rHeadingRad = h
+                            , rHeadingMagRad = h - degToRad 12 -- FIXME
                             , rRpm = acThrottle ac * acpMaxPropRpm hackyJab
                             }
         WS.sendTextData conn $ encode resp

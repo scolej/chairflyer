@@ -17,6 +17,8 @@ hackyJab =
   , acpPropD       = 1.524
   }
 
+-- FIXME atmosphere is not consistent between rate & step!
+
 -- | Rate of change function for the hacky Jabiru in standard atmosphere.
 jabRate :: Double -> AcState -> AcRate
 jabRate = acRate isa hackyJab

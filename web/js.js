@@ -110,7 +110,7 @@ window.addEventListener("load", function() {
         setAltitude(j.rAltitude);
         setAirspeed(j.rAirspeed);
         setTacho(j.rRpm);
-        setMagneticCompass(j.rHeadingRad);
+        setMagneticCompass(j.rHeadingMagRad);
 
         var pos = ol.proj.fromLonLat([j.rLatLon[1], j.rLatLon[0]]);
 
