@@ -22,17 +22,13 @@ data SimState = SimState
 
 instance Binary SimState
 
--- | Step the simulation over a timestep.
-stepSim :: Double -> SimState -> SimState
-stepSim dt s0 = undefined
-
 -- | Step sim state linearly over a time delta.
 -- FIXME need to take into account altitude: rescale vx to surface speed
 simStep
   :: (NVec ->
       Double ->
       Atmosphere) -- ^ Atmospheric conditions as a function of position
-  -> Double       -- ^ Delta time
+  -> Double       -- ^ Delta time, seconds
   -> SimState     -- ^ Start state
   -> SimState     -- ^ End state
 simStep atmos dt s0 =

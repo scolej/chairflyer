@@ -15,11 +15,11 @@ var iconStyle = new ol.style.Style({
 iconFeature.setStyle(iconStyle);
 
 var vectorSource = new ol.source.Vector({
-  features: [iconFeature]
+    features: [iconFeature]
 });
 
 var vectorLayer = new ol.layer.Vector({
-  source: vectorSource
+    source: vectorSource
 });
 
 //
@@ -116,14 +116,13 @@ window.addEventListener("load", function() {
 
         var z = 15 - 3 / 10000 * j.rAltitude;
 
-        if (i % 10 == 0) {
-            mapRot = j.rHeadingRad;
-            map.setView(new ol.View({
-                center: pos,
-                rotation: -mapRot,
-                zoom: z,
-            }));
-        }
+        mapRot = j.rHeadingRad;
+        map.setView(new ol.View({
+            center: pos,
+            rotation: -mapRot,
+            zoom: z,
+        }));
+
         iconFeature.setGeometry(new ol.geom.Point(pos));
         icon.setRotation(j.rHeadingRad - mapRot)
 

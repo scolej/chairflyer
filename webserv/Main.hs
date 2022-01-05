@@ -4,6 +4,7 @@ import SimState
 import Control.Concurrent
 import Control.Concurrent.STM
 import Control.Monad
+import Control.Exception
 import Data.Aeson
 import Data.Fixed
 import Data.Text
@@ -26,7 +27,7 @@ threadDelaySec s = threadDelay . round $ s * 1000000
 
 -- | Individual simulation time steps, seconds.
 simTimeStep :: Double
-simTimeStep = 3
+simTimeStep = 5
 
 ylil :: NVec
 ylil = llDegToNVec (-37.698329, 145.365335)
@@ -47,16 +48,13 @@ startState =
      , ssAltitude = 0
      , ssHeadingV = headingVector p h
      , ssPosition = p
-     , ssVelocity = Vec2 0 0
+     , ssVelocity = Vec2 (knotsToMps 50) 3
      }
 
 simpleSim :: TVar SimState -> IO ()
 simpleSim var = forever go
-  where f s = simStep atmos simTimeStep s
+  where f = simStep atmos simTimeStep
         go = do
-          -- FIXME
-          -- s <- readTVarIO var
-          -- print . acAltitude $ s
           atomically $ modifyTVar var f
           threadDelaySec simTimeStep
 
@@ -88,21 +86,20 @@ main :: IO ()
 main = do
   saveFileExists <- doesFileExist saveFile
   s0 <- if saveFileExists
-        then B.decodeFile saveFile
-        else return startState
+        then putStrLn "resuming from save" >> B.decodeFile saveFile
+        else putStrLn "starting afresh" >> return startState
   var <- newTVarIO s0
   _ <- forkIO $ simpleSim var
-  putStrLn $ "Starting on port " ++ show port
+  putStrLn $ "starting on port " ++ show port
   WS.runServer "127.0.0.1" port (app var)
 
 app :: TVar SimState -> WS.ServerApp
 app var pending = do
-  putStrLn "Got pending connection."
   conn <- WS.acceptRequest pending
+  putStrLn "accepted connection"
   let send = do
         s <- readTVarIO var
         let z = ssAltitude s
-            -- TODO only use the forward component of velocity
             v = ssVelocity s
             h = heading (ssPosition s) (ssHeadingV s)
             ll = nvecToLLDeg . ssPosition $ s
@@ -113,7 +110,9 @@ app var pending = do
                             , rHeadingMagRad = h - degToRad 12 -- FIXME
                             , rRpm = 0 -- FIXME
                             }
-        WS.sendTextData conn $ encode resp
+        catch (WS.sendTextData conn (encode resp))
+          ((\e -> do
+            putStrLn $ "exception while sending message: " ++ show e) :: WS.ConnectionException -> IO ())
         threadDelaySec simTimeStep
   _ <- forkIO $ forever send
   let save = do
@@ -122,11 +121,10 @@ app var pending = do
         putStrLn "saved"
         threadDelaySec 20
   _ <- forkIO $ forever save
-  return ()
-  -- let receive = do
-  --       txt <- unpack <$> WS.receiveData conn
-  --       putStrLn $ "Received " ++ txt
-  --       let u = parseMessage txt
-  --       atomically $ modifyTVar var u
-  -- forever receive
+  let receive = do
+        txt <- unpack <$> WS.receiveData conn
+        putStrLn $ "received " ++ txt
+        -- let u = parseMessage txt
+        -- atomically $ modifyTVar var u
+  forever receive
   -- FIXME if we use 'forever' here, what happens when the connection closes?
