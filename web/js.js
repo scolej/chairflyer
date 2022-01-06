@@ -132,25 +132,29 @@ window.addEventListener("load", function() {
     }
 
     document.addEventListener("keydown", function(event) {
-        if (event.key === "w") {
-            s.send("th+");
-        }
-        if (event.key === "s") {
-            s.send("th-");
-        }
         if (event.key === "ArrowLeft") {
-            s.send("l1");
+            s.send({tag:"Turn",contents:-1}.toString());
             i = 1;
         }
         if (event.key === "ArrowRight") {
-            s.send("r1");
+            s.send({tag:"Turn",contents:1});
             i = 1;
         }
-        if (event.key === "ArrowUp") {
-            s.send("pd1");
+        if (event.key === "1") {
+            s.send("\"Landed\"");
+            i = 1;
         }
-        if (event.key === "ArrowDown") {
-            s.send("pu1");
+        if (event.key === "2") {
+            s.send("\"Climb\"");
+            i = 1;
+        }
+        if (event.key === "3") {
+            s.send("\"Cruise\"");
+            i = 1;
+        }
+        if (event.key === "4") {
+            s.send("\"Descent\"");
+            i = 1;
         }
     });
 })
