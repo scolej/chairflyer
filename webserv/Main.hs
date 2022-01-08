@@ -8,7 +8,7 @@ import Control.Monad
 import Control.Exception
 import Data.Aeson
 import Data.Fixed
-import Data.Text
+import Data.Text hiding (unlines)
 import GHC.Generics
 import Atmosphere
 import Handy
@@ -28,7 +28,7 @@ threadDelaySec s = threadDelay . round $ s * 1000000
 
 -- | Individual simulation time steps, seconds.
 simTimeStep :: Double
-simTimeStep = 5
+simTimeStep = 1
 
 ylil :: NVec
 ylil = llDegToNVec (-37.698329, 145.365335)
@@ -120,7 +120,14 @@ handleJabCommand (AdoptConfiguration Descent) js =
   in js { jsRpm = 2400
         , jsSim = jsSim'
         }
-handleJabCommand (AdoptConfiguration _) _ = undefined
+handleJabCommand (Turn deg) js =
+  let ss0 = jsSim js
+      p0 = ssPosition ss0
+      h0 = ssHeading ss0
+      hv1 = headingVector p0 (h0 + degToRad deg)
+      ss1 = ss0 { ssHeadingV = hv1 }
+  in js { jsSim = ss1 }
+handleJabCommand _ js = js
 
 jabStep :: Double -> JabState -> JabState
 jabStep dt js =
@@ -171,8 +178,6 @@ saveFile = "save.dat"
 
 main :: IO ()
 main = do
-  print (encode (AdoptConfiguration Landed))
-  print (encode (Turn $ -10))
   saveFileExists <- doesFileExist saveFile
   s0 <- if saveFileExists
         then putStrLn "resuming from save" >> B.decodeFile saveFile
@@ -222,9 +227,10 @@ app controller var pending = do
         threadDelaySec 20
   _ <- forkIO $ forever save
   let receive = do
-        cmd <- decode <$> WS.receiveData conn
+        txt <- WS.receiveData conn
+        let cmd = eitherDecode txt
         case cmd
-          of Just c -> atomically $ modifyTVar var ((conInput controller) c)
-             Nothing -> putStrLn "received malformed command"
+          of Right c -> atomically $ modifyTVar var ((conInput controller) c)
+             Left e -> putStrLn $ unlines ["received malformed command:", e, show txt]
   forever receive
   -- FIXME if we use 'forever' here, what happens when the connection closes?

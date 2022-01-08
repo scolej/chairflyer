@@ -22,6 +22,10 @@ data SimState = SimState
 
 instance Binary SimState
 
+-- | Finds the angle from true north of the current heading vector.
+ssHeading :: SimState -> Double
+ssHeading s = heading (ssPosition s) (ssHeadingV s)
+
 -- | Step sim state linearly over a time delta.
 -- FIXME need to take into account altitude: rescale vx to surface speed
 simStep

@@ -95,7 +95,6 @@ function hideInstruments() {
     document.getElementById("instruments").style.display = 'none';
 }
 
-var i = 0;
 var mapRot = 0;
 window.addEventListener("load", function() {
 
@@ -127,34 +126,34 @@ window.addEventListener("load", function() {
         icon.setRotation(j.rHeadingRad - mapRot)
 
         // FIXME should allow tapping on map for pitch & heading
-
-        i += 1;
     }
 
+    document.getElementById("map").addEventListener("click", function(event) {
+        var x = event.x - event.target.width / 2;
+        var y = event.y - event.target.height / 2;
+        var theta = Math.atan2(x, -y);
+        console.log("click: " + x + " " + y + " " + theta);
+        s.send(JSON.stringify({
+            tag:"Turn",
+            contents:theta / Math.PI * 180,
+        }));
+    })
+
     document.addEventListener("keydown", function(event) {
+        var cmd;
         if (event.key === "ArrowLeft") {
-            s.send({tag:"Turn",contents:-1}.toString());
-            i = 1;
+            cmd = {tag:"Turn",contents:-1};
+        } else if (event.key === "ArrowRight") {
+            cmd = {tag:"Turn",contents:1};
+        } else if (event.key === "1") {
+            cmd = {tag:"AdoptConfiguration", contents:"Landed"};
+        } else if (event.key === "2") {
+            cmd = {tag:"AdoptConfiguration", contents:"Climb"};
+        } else if (event.key === "3") {
+            cmd = {tag:"AdoptConfiguration", contents:"Cruise"};
+        } else if (event.key === "4") {
+            cmd = {tag:"AdoptConfiguration", contents:"Descent"};
         }
-        if (event.key === "ArrowRight") {
-            s.send({tag:"Turn",contents:1});
-            i = 1;
-        }
-        if (event.key === "1") {
-            s.send("\"Landed\"");
-            i = 1;
-        }
-        if (event.key === "2") {
-            s.send("\"Climb\"");
-            i = 1;
-        }
-        if (event.key === "3") {
-            s.send("\"Cruise\"");
-            i = 1;
-        }
-        if (event.key === "4") {
-            s.send("\"Descent\"");
-            i = 1;
-        }
+        s.send(JSON.stringify(cmd));
     });
 })
