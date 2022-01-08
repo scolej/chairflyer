@@ -1,0 +1,40 @@
+A rough plan
+============
+
+
+must haves for basic usability
+------------------------------
+
+- show a clock NEXT
+
+
+must haves for person other than me usability
+---------------------------------------------
+
+- button for advance clock
+- means of control other than random keybindings
+      - buttons for climb/cruise/descent
+- a landing page to select:
+    - start pos & heading
+    - aircraft type
+    - wind / random wind
+
+
+basic prog improvements
+-----------------------
+
+- logging
+
+
+figure out how to go forward
+----------------------------
+
+- multi-plane & plane specific data on the websocket; how to do with json &
+  types?
+
+
+bugs
+----
+
+- if you time-step with a big number (10 hours) you end up at an invalid
+  position
