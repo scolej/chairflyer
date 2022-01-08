@@ -153,6 +153,8 @@ window.addEventListener("load", function() {
             cmd = {tag:"AdoptConfiguration", contents:"Cruise"};
         } else if (event.key === "4") {
             cmd = {tag:"AdoptConfiguration", contents:"Descent"};
+        } else if (event.key === "f") {
+            cmd = {tag:"FastForward", contents: 60 * 10};
         }
         s.send(JSON.stringify(cmd));
     });

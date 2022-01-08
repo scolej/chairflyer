@@ -92,8 +92,9 @@ startState =
               }
 
 data JabCommand
-  = Turn Double
-  | AdoptConfiguration JabConf
+  = Turn Double                -- ^ turn by some amount of degrees
+  | AdoptConfiguration JabConf -- ^ change flight configuration
+  | FastForward Double         -- ^ fast-forward the clock
   deriving Generic
 
 instance FromJSON JabCommand
@@ -126,6 +127,10 @@ handleJabCommand (Turn deg) js =
       h0 = ssHeading ss0
       hv1 = headingVector p0 (h0 + degToRad deg)
       ss1 = ss0 { ssHeadingV = hv1 }
+  in js { jsSim = ss1 }
+handleJabCommand (FastForward dt) js =
+  let ss0 = jsSim js
+      ss1 = simStep atmos dt ss0
   in js { jsSim = ss1 }
 handleJabCommand _ js = js
 
