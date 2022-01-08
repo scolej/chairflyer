@@ -42,7 +42,7 @@
             font-size: 4px;
         }
       </style>
-      <g id="airspeed" transform='translate(-60,0)'>
+      <g id="airspeed" transform='translate(-30,0)'>
         <circle r="30" fill="black"/>
         <polygon id="knots"
                  points="-1,4 -1,25 0,27 1,25 1,4"
@@ -87,7 +87,7 @@
         <text dominant-baseline='middle' text-anchor='middle' x='0' y='-5' class='asLabel'>AIRSPEED</text>
         <text dominant-baseline='middle' text-anchor='middle' x='0' y='5' class='asLabel'>KNOTS</text>
       </g>
-      <g id="altimeter">
+      <g id="altimeter" transform='translate(30,0)'>
         <circle r="30" fill="black"/>
         <polyline stroke="white" stroke-width="1" transform="rotate(0.0)" points="0,25 0,29"/>
         <polyline stroke="white" stroke-width="1" transform="rotate(36.0)" points="0,25 0,29"/>
@@ -167,42 +167,6 @@
         <polygon id="thousands" fill="white" points="-1.5,0 -2,8 0,15 2,8 1.5,0"/>
         <polygon id="hundreds" transform="rotate(30)" fill="white" points="-1,0 -1,23 0,25 1,23 1,0"/>
         <circle r="3" fill="#333"/>
-      </g>
-      <g id="tacho" transform='translate(60,0)'>
-        <circle r="30" fill="black"/>
-        <polyline transform='rotate(180.0)' points='0,25 0,29' stroke-width='1' stroke='white'/>
-        <polyline transform='rotate(324.0)' points='0,25 0,29' stroke-width='1' stroke='white'/>
-        <polyline transform='rotate(468.0)' points='0,25 0,29' stroke-width='1' stroke='white'/>
-        <polyline transform='rotate(612.0)' points='0,25 0,29' stroke-width='1' stroke='white'/>
-        <polyline transform='rotate(756.0)' points='0,25 0,29' stroke-width='1' stroke='white'/>
-        <polyline transform='rotate(50.4)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(64.8)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(79.2)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(93.6)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(108.0)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(122.4)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(136.8)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(151.2)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(165.6)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(180.0)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(194.4)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(208.8)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(223.2)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(237.6)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(252.0)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(266.4)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(280.8)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(295.2)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(309.6)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <polyline transform='rotate(324.0)' points='0,27 0,29' stroke-width='0.8' stroke='white'/>
-        <text dominant-baseline='middle' text-anchor='middle' x='-11.8' y='16.2' class='tachoText'>0</text>
-        <text dominant-baseline='middle' text-anchor='middle' x='-19.0' y='-6.2' class='tachoText'>10</text>
-        <text dominant-baseline='middle' text-anchor='middle' x='-0.0' y='-20.0' class='tachoText'>20</text>
-        <text dominant-baseline='middle' text-anchor='middle' x='19.0' y='-6.2' class='tachoText'>30</text>
-        <text dominant-baseline='middle' text-anchor='middle' x='11.8' y='16.2' class='tachoText'>40</text>
-        <polygon id="hand"
-                 points="-1,4 -1,25 0,27 1,25 1,4"
-                 fill="orange"/>
       </g>
       <!-- FIXME Fix so no need to scale -->
       <g id="magneticCompass" transform='translate(0,-55) scale(0.25 0.25)'>

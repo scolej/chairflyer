@@ -108,7 +108,7 @@ window.addEventListener("load", function() {
 
         setAltitude(j.rAltitude);
         setAirspeed(j.rAirspeed);
-        setTacho(j.rRpm);
+        // fixme setTacho(j.rRpm);
         setMagneticCompass(j.rHeadingMagRad);
 
         var pos = ol.proj.fromLonLat([j.rLatLon[1], j.rLatLon[0]]);
@@ -128,11 +128,11 @@ window.addEventListener("load", function() {
         // FIXME should allow tapping on map for pitch & heading
     }
 
+    // todo this is perhaps a bit too easy to trigger accidentally
     document.getElementById("map").addEventListener("click", function(event) {
         var x = event.x - event.target.width / 2;
         var y = event.y - event.target.height / 2;
         var theta = Math.atan2(x, -y);
-        console.log("click: " + x + " " + y + " " + theta);
         s.send(JSON.stringify({
             tag:"Turn",
             contents:theta / Math.PI * 180,

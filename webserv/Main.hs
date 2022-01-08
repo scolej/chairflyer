@@ -100,27 +100,19 @@ data JabCommand
 instance FromJSON JabCommand
 instance ToJSON JabCommand
 
+setConfiguration :: Double -> Double -> Double -> JabState -> JabState
+setConfiguration knots fpm rpm js =
+  let ss0 = jsSim js
+      ss1 = ss0 { ssVelocity = Vec2 (knotsToMps knots) (fpmToMps fpm) }
+  in js { jsRpm = rpm
+        , jsSim = ss1
+        }
+
 handleJabCommand :: JabCommand -> JabState -> JabState
-handleJabCommand (AdoptConfiguration Landed) js =
-  let jsSim' = (jsSim js) { ssVelocity = zerov2 }
-  in js { jsRpm = 0
-        , jsSim = jsSim'
-        }
-handleJabCommand (AdoptConfiguration Climb) js =
-  let jsSim' = (jsSim js) { ssVelocity = Vec2 (knotsToMps 80) (fpmToMps 1000) }
-  in js { jsRpm = 3100
-        , jsSim = jsSim'
-        }
-handleJabCommand (AdoptConfiguration Cruise) js =
-  let jsSim' = (jsSim js) { ssVelocity = Vec2 (knotsToMps 95) 0 }
-  in js { jsRpm = 2800
-        , jsSim = jsSim'
-        }
-handleJabCommand (AdoptConfiguration Descent) js =
-  let jsSim' = (jsSim js) { ssVelocity = Vec2 (knotsToMps 95) (fpmToMps $ -500) }
-  in js { jsRpm = 2400
-        , jsSim = jsSim'
-        }
+handleJabCommand (AdoptConfiguration Landed) js = setConfiguration 0 0 0 js
+handleJabCommand (AdoptConfiguration Climb) js = setConfiguration 80 1000 3100 js
+handleJabCommand (AdoptConfiguration Cruise) js = setConfiguration 95 0 2800 js
+handleJabCommand (AdoptConfiguration Descent) js = setConfiguration 95 (-500) 2400 js
 handleJabCommand (Turn deg) js =
   let ss0 = jsSim js
       p0 = ssPosition ss0
@@ -133,6 +125,7 @@ handleJabCommand (FastForward dt) js =
       ss1 = simStep atmos dt ss0
   in js { jsSim = ss1 }
 handleJabCommand _ js = js
+-- TODO how to log???
 
 jabStep :: Double -> JabState -> JabState
 jabStep dt js =
