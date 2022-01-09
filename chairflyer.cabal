@@ -5,7 +5,8 @@ cabal-version: >=1.10
 
 library
   build-depends: base
-               , binary
+               , aeson
+               , time
   ghc-options: -Wall
   hs-source-dirs: lib
   exposed-modules: SimState
@@ -38,5 +39,5 @@ executable webserv
                , aeson
                , chairflyer
                , stm
-               , binary
                , directory
+               , time

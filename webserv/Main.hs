@@ -16,7 +16,8 @@ import NVector
 import System.Directory
 import Units
 import Vec
-import qualified Data.Binary as B
+import Data.Time.LocalTime
+import Data.Time.Clock
 import qualified Network.WebSockets as WS
 
 --
@@ -61,7 +62,6 @@ data JabConf =
   Landed | Climb | Cruise | FastCruise | Descent
   deriving Generic
 
-instance B.Binary JabConf
 instance FromJSON JabConf
 instance ToJSON JabConf
 
@@ -72,14 +72,15 @@ data JabState = JabState
   , jsRpm :: Double
   } deriving (Generic)
 
-instance B.Binary JabState
+instance FromJSON JabState
+instance ToJSON JabState
 
-startState :: JabState
-startState =
+startState :: UTCTime -> JabState
+startState startTime =
   let h = degToRad 8
       p = ylil
       ss = SimState
-        { ssTime = 0
+        { ssTime = startTime
         , ssAltitude = 0
         , ssHeadingV = headingVector p h
         , ssPosition = p
@@ -161,6 +162,7 @@ data Response =
            , rHeadingRad :: Double
            , rHeadingMagRad :: Double
            , rRpm :: Double
+           , rTime :: UTCTime
            } deriving (Generic, Show)
 
 instance ToJSON Response where
@@ -169,17 +171,19 @@ instance ToJSON Response where
 instance FromJSON Response
 
 port :: Int
-port = 8000
+port = 9091
 
 saveFile :: String
-saveFile = "save.dat"
+saveFile = "save.json"
 
 main :: IO ()
 main = do
   saveFileExists <- doesFileExist saveFile
-  s0 <- if saveFileExists
-        then putStrLn "resuming from save" >> B.decodeFile saveFile
-        else putStrLn "starting afresh" >> return startState
+  now <- getCurrentTime
+  -- fixme
+  Just s0 <- if saveFileExists
+             then putStrLn "resuming from save" >> decodeFileStrict saveFile
+             else putStrLn "starting afresh" >> return (Just $ startState now)
   var <- newTVarIO s0
   _ <- forkIO $ (simpleSim jabControl) var
   putStrLn $ "listening on port " ++ show port
@@ -192,7 +196,7 @@ main = do
 -- TODO
 -- in landed conf, wind should not blow us along
 
-app :: (B.Binary a, FromJSON b) => Controller a b -> TVar a -> WS.ServerApp
+app :: (ToJSON a, FromJSON b) => Controller a b -> TVar a -> WS.ServerApp
 app controller var pending = do
   conn <- WS.acceptRequest pending
   putStrLn "accepted connection"
@@ -203,6 +207,7 @@ app controller var pending = do
             v = ssVelocity s
             h = heading (ssPosition s) (ssHeadingV s)
             ll = nvecToLLDeg . ssPosition $ s
+            t = ssTime s
             -- TODO how to add extra stuff from a
             resp = Response { rAltitude = mToFt z
                             , rAirspeed = mpsToKnots (magv2 v)
@@ -210,6 +215,7 @@ app controller var pending = do
                             , rHeadingRad = h
                             , rHeadingMagRad = h - degToRad 12 -- FIXME
                             , rRpm = 0 -- FIXME
+                            , rTime = t
                             }
         WS.sendTextData conn (encode resp)
         -- TODO stop sending on exception
@@ -220,7 +226,7 @@ app controller var pending = do
   _ <- forkIO $ forever send
   let save = do
         ac <- readTVarIO var
-        B.encodeFile saveFile ac
+        encodeFile saveFile ac
         putStrLn "saved"
         threadDelaySec 20
   _ <- forkIO $ forever save

@@ -18,12 +18,16 @@ must haves for person other than me usability
     - start pos & heading
     - aircraft type
     - wind / random wind
+- upper/lower bounds on alt
+- multi-session
 
 
 basic prog improvements
 -----------------------
 
+- changes to allow access from phone!
 - logging
+- sending way more bytes than necessary; data on WS could be much more efficient
 
 
 figure out how to go forward
@@ -38,3 +42,5 @@ bugs
 
 - if you time-step with a big number (10 hours) you end up at an invalid
   position
+
+- turning does not work on phone

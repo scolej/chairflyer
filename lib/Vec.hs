@@ -2,20 +2,22 @@
 
 module Vec where
 
-import Data.Binary
+import Data.Aeson
 import GHC.Generics (Generic)
 
 data Vec2 =
   Vec2 Double Double
   deriving (Eq, Show, Generic)
 
-instance Binary Vec2
+instance ToJSON Vec2
+instance FromJSON Vec2
 
 data Vec3 =
   Vec3 Double Double Double
   deriving (Eq, Show, Generic)
 
-instance Binary Vec3
+instance ToJSON Vec3
+instance FromJSON Vec3
 
 zerov2 :: Vec2
 zerov2 = Vec2 0 0

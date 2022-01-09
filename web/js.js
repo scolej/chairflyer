@@ -101,8 +101,9 @@ window.addEventListener("load", function() {
     setAirspeed(0);
     setAltitude(0);
 
-    // FIXME don't hardcode server location
-    var s = new WebSocket("ws://127.0.0.1:8000", "protocolOne");
+    var h = location.hostname;
+    var u = `ws://${h}:9091`;
+    var s = new WebSocket(u, "protocolOne");
     s.onmessage = function (event) {
         var j = JSON.parse(event.data);
 
