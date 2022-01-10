@@ -85,6 +85,7 @@ startState startTime =
         , ssHeadingV = headingVector p h
         , ssPosition = p
         , ssVelocity = zerov2
+        , ssLanded = True
         }
   in JabState { jsSim = ss
               , jsConf = Landed
@@ -104,7 +105,10 @@ instance ToJSON JabCommand
 setConfiguration :: Double -> Double -> Double -> JabState -> JabState
 setConfiguration knots fpm rpm js =
   let ss0 = jsSim js
-      ss1 = ss0 { ssVelocity = Vec2 (knotsToMps knots) (fpmToMps fpm) }
+      ss1 = ss0 { ssVelocity = Vec2 (knotsToMps knots) (fpmToMps fpm)
+                -- TODO could just pass through the actual conf and not do this backwards hack.
+                , ssLanded = if knots == 0 then True else False
+                }
   in js { jsRpm = rpm
         , jsSim = ss1
         }

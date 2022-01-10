@@ -41,6 +41,10 @@
         #subscale {
             font-size: 4px;
         }
+        #clock #time {
+            font-size: 30px;
+            font-family: mono;
+        }
       </style>
       <g id="airspeed" transform='translate(-30,0)'>
         <circle r="30" fill="black"/>
@@ -169,6 +173,10 @@
         <circle r="3" fill="#333"/>
       </g>
       <!-- FIXME Fix so no need to scale -->
+      <g id="clock" transform='translate(-50,-55) scale(0.25 0.25)'>
+        <rect x="-65" y="-40" height="80" width="130" rx="15" fill='gray' stroke='black' stroke-width='8'/>
+        <text id="time" dominant-baseline="middle" text-anchor="middle">00:00</text>
+      </g>
       <g id="magneticCompass" transform='translate(0,-55) scale(0.25 0.25)'>
         <mask id='windowMask'>
           <rect x="-65" y="-40" height="80" width="130" rx="15" fill='white'/>

@@ -5,7 +5,6 @@ A rough plan
 must haves for basic usability
 ------------------------------
 
-- show a clock NEXT
 
 
 must haves for person other than me usability
@@ -14,6 +13,7 @@ must haves for person other than me usability
 - button for advance clock
 - means of control other than random keybindings
       - buttons for climb/cruise/descent
+- turn rate buttons
 - a landing page to select:
     - start pos & heading
     - aircraft type
@@ -25,6 +25,8 @@ must haves for person other than me usability
 basic prog improvements
 -----------------------
 
+- sync update & send
+- sync fast-forward and update
 - changes to allow access from phone!
 - logging
 - sending way more bytes than necessary; data on WS could be much more efficient

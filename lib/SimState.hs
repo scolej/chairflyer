@@ -6,7 +6,6 @@ import Data.Aeson
 import GHC.Generics (Generic)
 import Data.Time
 import Data.Ratio
-import Data.Time.Clock
 
 import Atmosphere
 import NVector
@@ -20,6 +19,7 @@ data SimState = SimState
   , ssPosition :: NVec    -- ^ Position
   , ssVelocity :: Vec2    -- ^ 2D velocity, longitudinal & vertical
   , ssHeadingV :: Vec3    -- ^ Aircraft heading vector
+  , ssLanded   :: Bool    -- ^ True indicates we're on the ground
   }
   deriving (Generic)
 
@@ -52,8 +52,8 @@ simStep atmos dt s0 =
     Vec2 vx vz = ssVelocity s0
     w = inPlaneAt p0 $ atmosWind $ atmos p0 z0
     hv0 = ssHeadingV s0
-    -- velocity vector, including wind
-    vv = (vx `scalev3` hv0) `addv3` w
+    -- velocity vector, including wind (but only if we're not "landed")
+    vv = (vx `scalev3` hv0) `addv3` (if ssLanded s0 then zerov3 else w)
     p1 = unitv3 $ destinationV (unitv3 vv) (dt * magv3 vv) p0
     -- heading vector is always orthogonal to position vector
     hv1 = unitv3 $ crossv3 (crossv3 p1 hv0) p1

@@ -87,6 +87,18 @@ function setMagneticCompass(rad) {
     setTranslate(svg.getElementById("compassStrip"), x, 0)
 }
 
+function leftPad(n, ch, str) {
+    return ch.repeat(n - str.length) + str;
+}
+
+function setClock(date) {
+    var svg = document.getElementById("instruments");
+    var str = leftPad(2, '0', date.getHours().toString())
+        + ":"
+        + leftPad(2, '0', date.getMinutes().toString());
+    svg.getElementById("time").innerHTML = str;
+}
+
 function showInstruments() {
     document.getElementById("instruments").style.display = 'block';
 }
@@ -111,6 +123,7 @@ window.addEventListener("load", function() {
         setAirspeed(j.rAirspeed);
         // fixme setTacho(j.rRpm);
         setMagneticCompass(j.rHeadingMagRad);
+        setClock(new Date(j.rTime));
 
         var pos = ol.proj.fromLonLat([j.rLatLon[1], j.rLatLon[0]]);
 
